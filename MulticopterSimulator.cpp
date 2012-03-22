@@ -8,7 +8,7 @@ MulticopterSimulator::MulticopterSimulator(QObject *parent) :
     QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(updateError()));
     QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(updateText()));
     QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(updateExit(int,QProcess::ExitStatus)));
-    proc->start("/Users/mhespenh/SimEngine/SimEngine");
+    proc->start("/Users/mhespenh/SimMotor/SimMotor");
 }
 
 void MulticopterSimulator::updateError() {
