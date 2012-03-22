@@ -8,10 +8,14 @@
 ***********************************************************************/
 
 #include <QtCore/QCoreApplication>
+#include <MulticopterSimulator.h>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
 
+    MulticopterSimulator sim;
+    sim.writeData("Hello from another process\n");
     return a.exec();
 }
