@@ -1,3 +1,5 @@
+//Initial commit
+// Added mhespenh
 #include <QtCore/QCoreApplication>
 
 int main(int argc, char *argv[])
