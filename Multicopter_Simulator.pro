@@ -10,6 +10,7 @@ QT       -= gui
 
 TARGET = Multicopter_Simulator
 CONFIG   += console
+CONFIG   += qdbus
 CONFIG   -= app_bundle
 
 TEMPLATE = app
