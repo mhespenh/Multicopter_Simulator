@@ -5,7 +5,7 @@
 
   Revisions:
     03/21/2012 - Initial version (master branch)
-    03/23/2012 - Implemented dbus communication
+    03/23/2012 - Implemented dbus communication correctly
 ***********************************************************************/
 
 #include <QtCore/QCoreApplication>
@@ -18,10 +18,5 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     MulticopterSimulator sim;
-    if( sim.initDbus() ) {
-        return a.exec();
-    }
-    else {
-        return -1;
-    }
+    a.exec();
 }

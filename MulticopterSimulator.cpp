@@ -5,26 +5,28 @@
 
   Revisions:
     03/21/2012 - Initial version (master branch)
-    03/23/2012 - Implemented dbus communication
+    03/23/2012 - Implemented dbus communication correctly
 ***********************************************************************/
 
 #include "MulticopterSimulator.h"
+#include "common.h"
 #include <QDebug>
-#include <QtDBus/QtDBus>
 
 MulticopterSimulator::MulticopterSimulator(QObject *parent) :
-    QObject(parent)
+    QObject(parent), bus(QDBusConnection::sessionBus())
 {
-/* //For some reason it seems we can't connect on the dbus if we start the process here...?
-    proc = new QProcess(this);
+ //For some reason it seems we can't connect on the dbus if we start the process here...?
+ /*   proc = new QProcess(this);
     QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(updateError()));
     QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(updateText()));
     QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(updateExit(int,QProcess::ExitStatus)));
     proc->start("/home/mhespenh/Desktop/Project2/SimMotor/SimMotor");
 
-    proc->waitForStarted(10000); //wait for process to start
+    proc->waitForStarted(-1); //wait for process to start
     qDebug() << "Proc started";
 */
+    bus.connect("", "/", "edu.vt.ece.ack", "ack", this, SLOT(recvMessage(QString)));
+    sendDbusMessage("Hello, world!", 69);
 }
 
 void MulticopterSimulator::updateError() {
@@ -42,31 +44,12 @@ void MulticopterSimulator::updateText() {
     qDebug() << QString(data);
 }
 
-void MulticopterSimulator::writeData(QByteArray data) {
-    proc->write(data);
+void MulticopterSimulator::recvMessage(QString msg) {
+    qDebug() << "Received: " << msg;
 }
 
-bool MulticopterSimulator::initDbus() {
-    if (!QDBusConnection::sessionBus().isConnected()) {
-         fprintf(stderr, "Cannot connect to the D-Bus session bus.\n"
-                 "To start it, run:\n"
-                 "\teval `dbus-launch --auto-syntax`\n");
-         return false;
-     }
-
-    QDBusInterface iface("edu.vt.ece.simmotor", "/", "", QDBusConnection::sessionBus());
-     if (iface.isValid()) {
-         QDBusReply<QString> reply = iface.call("recvMessage", "Hello", 45);
-         if (reply.isValid()) {
-             printf("Reply was: %s\n", qPrintable(reply.value()));
-         }
-         else {
-            fprintf(stderr, "Call failed: %s\n", qPrintable(reply.error().message()));
-        }
-     }
-     else {
-         fprintf(stderr, "%s\n", qPrintable(QDBusConnection::sessionBus().lastError().message()));
-         return false;
-     }
-     return true;
+void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
+    QDBusMessage out = QDBusMessage::createSignal("/", "edu.vt.ece.msg", "msg");
+    out << msg << type;
+    bus.send(out);
 }
