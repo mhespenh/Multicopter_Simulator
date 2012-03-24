@@ -1,2 +1,10 @@
+Usage:
+	For now you have to run SimMotor in a terminal window first
+	Then run Multicopter_Simulator.  This should be fixed in a 
+	later version, where the SimMotor process will be launched 
+	automagically.
+
 Changelog:
-	03/21/2012 - Initial version -MAH
+	03/21/2012 - Initial Version -MAH
+		   - Changed all references to "Engine" to "Motor" -MAH
+	03/23/2012 - Successfully implemented DBus message passing -MAH
