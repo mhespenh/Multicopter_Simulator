@@ -11,6 +11,11 @@
 #include <QObject>
 #include <QProcess>
 #include <QtDBus/QtDBus>
+#include <QSharedMemory>
+
+struct data {
+    int t0, t1, t2, t3;
+};
 
 class MulticopterSimulator : public QObject
 {
@@ -28,6 +33,8 @@ public slots:
 
 private:
     void sendDbusMessage(QString, int);
+    bool writeSharedMem();
     QProcess* proc;
     QDBusConnection bus;
+    QSharedMemory sharedMem;
 };

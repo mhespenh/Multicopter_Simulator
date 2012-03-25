@@ -9,11 +9,10 @@
 ***********************************************************************/
 
 #include "MulticopterSimulator.h"
-#include "common.h"
 #include <QDebug>
 
 MulticopterSimulator::MulticopterSimulator(QObject *parent) :
-    QObject(parent), bus(QDBusConnection::sessionBus())
+    QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PRIVATE_SHARED")
 {
  //For some reason it seems we can't connect on the dbus if we start the process here...?
  /*   proc = new QProcess(this);
@@ -27,6 +26,7 @@ MulticopterSimulator::MulticopterSimulator(QObject *parent) :
 */
     bus.connect("", "/", "edu.vt.ece.ack", "ack", this, SLOT(recvMessage(QString)));
     sendDbusMessage("Hello, world!", 69);
+    writeSharedMem();
 }
 
 void MulticopterSimulator::updateError() {
@@ -52,4 +52,23 @@ void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
     QDBusMessage out = QDBusMessage::createSignal("/", "edu.vt.ece.msg", "msg");
     out << msg << type;
     bus.send(out);
+}
+
+bool MulticopterSimulator::writeSharedMem() {
+    if (sharedMem.isAttached()) {
+        sharedMem.detach();
+    }
+    data* theData;
+
+     if (!sharedMem.create(sizeof(data))) {
+         return false;
+     }
+     sharedMem.lock();
+     theData = (data*)sharedMem.data();
+     theData->t0 = 55;
+     theData->t1 = 6;
+     theData->t2 = 71;
+     theData->t3 = 8;
+     sharedMem.unlock();
+     return true;
 }
