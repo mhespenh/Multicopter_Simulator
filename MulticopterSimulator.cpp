@@ -42,13 +42,14 @@ void MulticopterSimulator::processStarted(QString reply) {
 
 void MulticopterSimulator::processError() {
     QByteArray data = proc->readAllStandardError();
+    data.chop(1); //remove the \n
     qDebug() << "Received (STDERR): " << QString(data);
 
 }
 
 void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
     qDebug() << "Process Exited with status: " << bar;
-    qDebug() << "\nSo we'll quit too.";
+    qDebug() << "So we'll quit too.";
     QCoreApplication::quit();
 }
 
@@ -78,11 +79,11 @@ bool MulticopterSimulator::writeSharedMem() {
      }
      sharedMem.lock();
      theData = (data*)sharedMem.data();
-     theData->t0 = 55;
+     theData->t0 = 5;
      theData->t1 = 6;
-     theData->t2 = 71;
+     theData->t2 = 7;
      theData->t3 = 8;
      sharedMem.unlock();
-     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3 << "\n";
+     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;
      return true;
 }
