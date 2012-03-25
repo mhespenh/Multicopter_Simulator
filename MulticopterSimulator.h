@@ -22,6 +22,7 @@ class MulticopterSimulator : public QObject
     Q_OBJECT
 public:
     explicit MulticopterSimulator(QObject *parent = 0);
+    ~MulticopterSimulator();
 
 signals:
 
@@ -30,6 +31,7 @@ public slots:
     void processSTDOUT(void);
     void processExit(int,QProcess::ExitStatus);
     void recvMessage(QString);
+    void processStarted(QString);
 
 private:
     void sendDbusMessage(QString, int);

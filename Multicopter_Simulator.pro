@@ -11,3 +11,4 @@ TEMPLATE = app
 SOURCES += main.cpp \
     MulticopterSimulator.cpp
 HEADERS += MulticopterSimulator.h
+OTHER_FILES += README

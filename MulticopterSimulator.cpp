@@ -14,8 +14,9 @@
 MulticopterSimulator::MulticopterSimulator(QObject *parent) :
     QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PRIVATE_SHARED")
 {
- //For some reason it seems we can't connect on the dbus if we start the process here...?
- /*   proc = new QProcess(this);
+    writeSharedMem();
+
+    proc = new QProcess(this); //new qprocess to run a motor process
     QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(processError()));
     QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(processSTDOUT()));
     QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(processExit(int,QProcess::ExitStatus)));
@@ -23,29 +24,41 @@ MulticopterSimulator::MulticopterSimulator(QObject *parent) :
 
     proc->waitForStarted(-1); //wait for process to start
     qDebug() << "Proc started";
-*/
+    //Signal: procStart- Motor process will emit this signal over the dbus when is starts and connects
+    bus.connect("", "/", "edu.vt.ece.procStart", "procStart", this, SLOT(processStarted(QString)));
     bus.connect("", "/", "edu.vt.ece.ack", "ack", this, SLOT(recvMessage(QString)));
+}
+
+MulticopterSimulator::~MulticopterSimulator() {
+    qDebug() << "Cleaning up...";
+    sharedMem.detach();
+    sharedMem.deleteLater();
+}
+
+void MulticopterSimulator::processStarted(QString reply) {
+    qDebug() << "Received (DBus): " << reply;
     sendDbusMessage("Hello, world!", 69);
-    writeSharedMem();
 }
 
 void MulticopterSimulator::processError() {
     QByteArray data = proc->readAllStandardError();
-    qDebug() << QString(data);
+    qDebug() << "Received (STDERR): " << QString(data);
 
 }
 
 void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
-    qDebug() << "Exited\n" << foo << "\t" << bar;
+    qDebug() << "Process Exited with status: " << bar;
+    qDebug() << "\nSo we'll quit too.";
+    QCoreApplication::quit();
 }
 
 void MulticopterSimulator::processSTDOUT() {
     QByteArray data = proc->readAllStandardOutput();
-    qDebug() << QString(data);
+    qDebug() << "Received (STDOUT): " << QString(data);
 }
 
 void MulticopterSimulator::recvMessage(QString msg) {
-    qDebug() << "Received: " << msg;
+    qDebug() << "Received (DBus): " << msg;
 }
 
 void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
@@ -70,5 +83,6 @@ bool MulticopterSimulator::writeSharedMem() {
      theData->t2 = 71;
      theData->t3 = 8;
      sharedMem.unlock();
+     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3 << "\n";
      return true;
 }

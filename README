@@ -1,11 +1,12 @@
 Usage:
-	For now you have to run SimMotor in a terminal window first
-	Then run Multicopter_Simulator.  This should be fixed in a 
-	later version, where the SimMotor process will be launched 
-	automagically.
+        Compile both SimMotor and Multicopter_Simulator
+        Make sure you change the PATH to the SimMotor binary in the constructor
+            in MulticopterSimulator.cpp to match your directory structure!
+        Run Multicopter_Simulator from the command line and enjoy
 
 Changelog:
 	03/21/2012 - Initial Version -MAH
 		   - Changed all references to "Engine" to "Motor" -MAH
 	03/23/2012 - Successfully implemented DBus message passing -MAH
         03/25/2012 - Implemented a rough example of QSharedMemory -MAH
+        03/26/2012 - Successfully implemented qProcesses! -MAH
