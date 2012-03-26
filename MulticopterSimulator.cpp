@@ -16,9 +16,9 @@ MulticopterSimulator::MulticopterSimulator(QObject *parent) :
 {
  //For some reason it seems we can't connect on the dbus if we start the process here...?
  /*   proc = new QProcess(this);
-    QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(updateError()));
-    QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(updateText()));
-    QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(updateExit(int,QProcess::ExitStatus)));
+    QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(processError()));
+    QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(processSTDOUT()));
+    QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(processExit(int,QProcess::ExitStatus)));
     proc->start("/home/mhespenh/Desktop/Project2/SimMotor/SimMotor");
 
     proc->waitForStarted(-1); //wait for process to start
@@ -29,17 +29,17 @@ MulticopterSimulator::MulticopterSimulator(QObject *parent) :
     writeSharedMem();
 }
 
-void MulticopterSimulator::updateError() {
+void MulticopterSimulator::processError() {
     QByteArray data = proc->readAllStandardError();
     qDebug() << QString(data);
 
 }
 
-void MulticopterSimulator::updateExit(int foo, QProcess::ExitStatus bar) {
+void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
     qDebug() << "Exited\n" << foo << "\t" << bar;
 }
 
-void MulticopterSimulator::updateText() {
+void MulticopterSimulator::processSTDOUT() {
     QByteArray data = proc->readAllStandardOutput();
     qDebug() << QString(data);
 }

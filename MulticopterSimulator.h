@@ -26,9 +26,9 @@ public:
 signals:
 
 public slots:
-    void updateError(void);
-    void updateText(void);
-    void updateExit(int,QProcess::ExitStatus);
+    void processError(void);
+    void processSTDOUT(void);
+    void processExit(int,QProcess::ExitStatus);
     void recvMessage(QString);
 
 private:
