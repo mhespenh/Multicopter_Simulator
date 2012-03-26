@@ -18,6 +18,6 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    MulticopterSimulator sim;
+    MulticopterSimulator sim(4);
     a.exec();
 }

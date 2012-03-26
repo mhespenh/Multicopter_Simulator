@@ -21,7 +21,7 @@ class MulticopterSimulator : public QObject
 {
     Q_OBJECT
 public:
-    explicit MulticopterSimulator(QObject *parent = 0);
+    explicit MulticopterSimulator(int numProcs, QObject *parent = 0);
     ~MulticopterSimulator();
 
 signals:
@@ -37,6 +37,7 @@ private:
     void sendDbusMessage(QString, int);
     bool writeSharedMem();
     QProcess* proc;
+    QProcess* procs;
     QDBusConnection bus;
     QSharedMemory sharedMem;
 };

@@ -11,22 +11,22 @@
 #include "MulticopterSimulator.h"
 #include <QDebug>
 
-MulticopterSimulator::MulticopterSimulator(QObject *parent) :
+MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PRIVATE_SHARED")
 {
     writeSharedMem();
-
-    proc = new QProcess(this); //new qprocess to run a motor process
-    QObject::connect(proc, SIGNAL(readyReadStandardError()), this, SLOT(processError()));
-    QObject::connect(proc, SIGNAL(readyReadStandardOutput()), this, SLOT(processSTDOUT()));
-    QObject::connect(proc, SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(processExit(int,QProcess::ExitStatus)));
-    proc->start("/home/mhespenh/Desktop/Project2/SimMotor/SimMotor");
-
-    proc->waitForStarted(-1); //wait for process to start
-    qDebug() << "Proc started";
+    procs = new QProcess[numProcs];
     //Signal: procStart- Motor process will emit this signal over the dbus when is starts and connects
     bus.connect("", "/", "edu.vt.ece.procStart", "procStart", this, SLOT(processStarted(QString)));
     bus.connect("", "/", "edu.vt.ece.ack", "ack", this, SLOT(recvMessage(QString)));
+
+    for(int i=0; i<numProcs; i++) {
+//        QObject::connect(procs[i], SIGNAL(readyReadStandardError()), this, SLOT(processError()));
+//        QObject::connect(procs[i], SIGNAL(readyReadStandardOutput()), this, SLOT(processSTDOUT()));
+//        QObject::connect(procs[i], SIGNAL(finished(int,QProcess::ExitStatus)), this, SLOT(processExit(int,QProcess::ExitStatus)));
+        procs[i].start("/home/mhespenh/Desktop/Project2/SimMotor/SimMotor");
+        qDebug() << "Motor process " << i << " started";
+    }
 }
 
 MulticopterSimulator::~MulticopterSimulator() {
@@ -36,19 +36,19 @@ MulticopterSimulator::~MulticopterSimulator() {
 }
 
 void MulticopterSimulator::processStarted(QString reply) {
-    qDebug() << "Received (DBus): " << reply;
+    qDebug() << "Received from motor process (DBus):   " << reply;
     sendDbusMessage("Hello, world!", 69);
 }
 
 void MulticopterSimulator::processError() {
     QByteArray data = proc->readAllStandardError();
     data.chop(1); //remove the \n
-    qDebug() << "Received (STDERR): " << QString(data);
+    qDebug() << "Received from motor process (STDERR): " << QString(data);
 
 }
 
 void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
-    qDebug() << "Process Exited with status: " << bar;
+    qDebug() << "Motor Process Exited with status:     " << bar << "/" << foo;
     qDebug() << "So we'll quit too.";
     QCoreApplication::quit();
 }
@@ -59,7 +59,7 @@ void MulticopterSimulator::processSTDOUT() {
 }
 
 void MulticopterSimulator::recvMessage(QString msg) {
-    qDebug() << "Received (DBus): " << msg;
+    qDebug() << "Received from motor process (DBus):   " << msg;
 }
 
 void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
@@ -80,8 +80,8 @@ bool MulticopterSimulator::writeSharedMem() {
      sharedMem.lock();
      theData = (data*)sharedMem.data();
      theData->t0 = 5;
-     theData->t1 = 6;
-     theData->t2 = 7;
+     theData->t1 = 66;
+     theData->t2 = 77;
      theData->t3 = 8;
      sharedMem.unlock();
      qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;
