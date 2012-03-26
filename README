@@ -10,3 +10,9 @@ Changelog:
 	03/23/2012 - Successfully implemented DBus message passing -MAH
         03/25/2012 - Implemented a rough example of QSharedMemory -MAH
         03/26/2012 - Successfully implemented qProcesses! -MAH
+
+Notes:
+	Apparently there is non-trivial delay when connecting to the dbus, that is why I
+	have the motor process emiting a "started" signal over the dbus, otherwise we have
+	no idea if/when the process has successfully connected to the bus.  That was fun to
+	figure out...
