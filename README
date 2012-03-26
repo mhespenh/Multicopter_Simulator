@@ -12,7 +12,7 @@ Changelog:
         03/26/2012 - Successfully implemented qProcesses! -MAH
 
 Notes:
-	Apparently there is non-trivial delay when connecting to the dbus, that is why I
-	have the motor process emiting a "started" signal over the dbus, otherwise we have
-	no idea if/when the process has successfully connected to the bus.  That was fun to
-	figure out...
+	Apparently there is non-trivial delay when connecting to the dbus, that is
+	why I have the motor process emiting a "started" signal over the dbus, 
+	otherwise we have no idea if/when the process has successfully connected to 
+	the bus.  That was fun to figure out...
