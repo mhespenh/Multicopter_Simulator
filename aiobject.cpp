@@ -620,11 +620,13 @@ bool AIObject::setDestination(int x, int y)
     else return false;
 }
 
-void AIObject::getTargetAngles(float& pitch, float& roll)
+void AIObject::getTargetAngles(float& pitch, float& roll, int x, int y)
 {
 
     QList<int> distances, displacements;
     QString x_dir, y_dir;
+    cur_x = x;
+    cur_y = y;
 
     //Figure direction
     if(cur_x > dest_x) x_dir = "West";
@@ -700,6 +702,6 @@ void AIObject::getTargetAngles(float& pitch, float& roll)
         }
     }
 
-    qDebug() << y_dir << x_dir;
+    // PID
 
 }

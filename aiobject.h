@@ -15,7 +15,7 @@ class AIObject
 public:
     AIObject(int, int, int);
     bool setDestination(int, int);
-    void getTargetAngles(float&, float&);
+    void getTargetAngles(float&, float&, int, int);
 private:
     void pop_environment();
     QList<int> scan(int, int, QString);
