@@ -2,15 +2,19 @@
 
 AIObject::AIObject(int start_x, int start_y, int arm_length)
 {
-    stop = 0;
     arm_len = arm_length;
     cur_x = start_x;
     cur_y = start_y;
     dest_x = 400;
     dest_y = 400;
+    kp = 5;     //proportional gain
+    ki = 3;   //integral gain
+    kd = 0.05;  //derivative gain
+    da = 0.01;     //simulation angle
+    angle = 0.0;
+    integral = 0.0;
+    prevError = 0.0;
     pop_environment(); // Initial environment is a single pole with coordinates (100,100), (110,100), (110,110), (100,110);
-    float a, b;
-    getTargetAngles(a,b);
 
 }
 
@@ -620,7 +624,7 @@ bool AIObject::setDestination(int x, int y)
     else return false;
 }
 
-void AIObject::getTargetAngles(float& pitch, float& roll, int x, int y)
+void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
 {
 
     QList<int> distances, displacements;
@@ -646,62 +650,157 @@ void AIObject::getTargetAngles(float& pitch, float& roll, int x, int y)
     distances << N.at(0) << E.at(0) << S.at(0) << W.at(0);
     displacements << N.at(1) << E.at(1) << S.at(1) << W.at(1);
 
-    if(x_dir == "North") {
-        if(y_dir == "East") {
-            if(distances.at(0) == 0 && distances.at(1) == 0) {
-                pitch = DEFAULT_PITCH;
+    if(x_dir == "North") { //Need to head North!
+        if(y_dir == "East") { //Need to head East!
+            if(distances.at(0) < 0 && distances.at(1) < 0) { // NorthEast is free of obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(dest_x);
+            }
+            else if(distances.at(0) < 0 && distances.at(1) >= 0) { // North is free but East has obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(displacements.at(1));
+            }
+            else if(distances.at(0) >= 0 && distances.at(1) < 0) { //North is blocked but East is free
+                pitch = angleController(displacements.at(0));
+                roll = angleController(dest_x);
+            }
+            else { // NorthEast is blocked
+                pitch = angleController(displacements.at(0));
+                roll = angleController(displacements.at(1));
+            }
+        }
+        else if(y_dir == "West"){ //Need to head West!
+            if(distances.at(0) < 0 && distances.at(3) < 0) { //No obstacle
+                pitch = angleController(dest_y);
+                roll = angleController(dest_x);
+            }
+            else if(distances.at(0) < 0 && distances.at(3) >= 0) { // North is free but West has obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(displacements.at(3));
+            }
+            else if(distances.at(0) >= 0 && distances.at(3) < 0) { //North is blocked but East is free
+                pitch = angleController(displacements.at(0));
+                roll = angleController(dest_x);
+            }
+            else { // NorthEast is blocked
+                pitch = angleController(displacements.at(0));
+                roll = angleController(displacements.at(3));
+            }
+        }
+        else{
+            if(distances.at(0) < 0) {
+                pitch = angleController(dest_y);
                 roll = DEFAULT_ROLL;
             }
-            else {}
-        }
-        else if(y_dir == "West"){
-            if(distances.at(0) == 0 && distances.at(3) == 0) {
-                pitch = DEFAULT_PITCH;
+            else {
+                pitch = angleController(displacements.at(0));
                 roll = DEFAULT_ROLL;
             }
-            else {}
         }
-        else{}
     }
-    else if(x_dir == "South") {
-        if(y_dir == "East") {
-            if(distances.at(2) == 0 && distances.at(1) == 0) {
-                pitch = DEFAULT_PITCH;
+    else if(x_dir == "South") { //Need to head South!
+        if(y_dir == "East") { //Need to head East!
+            if(distances.at(2) < 0 && distances.at(1) < 0) { // SouthEast is free of obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(dest_x);
+            }
+            else if(distances.at(2) < 0 && distances.at(1) >= 0) { // South is free but East has obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(displacements.at(1));
+            }
+            else if(distances.at(2) >= 0 && distances.at(1) < 0) { //South is blocked but East is free
+                pitch = angleController(displacements.at(2));
+                roll = angleController(dest_x);
+            }
+            else { // SouthEast is blocked
+                pitch = angleController(displacements.at(2));
+                roll = angleController(displacements.at(1));
+            }
+        }
+        else if(y_dir == "West"){ //Need to head West!
+            if(distances.at(2) < 0 && distances.at(3) < 0) { //No obstacle
+                pitch = angleController(dest_y);
+                roll = angleController(dest_x);
+            }
+            else if(distances.at(2) < 0 && distances.at(3) >= 0) { // South is free but West has obstacles
+                pitch = angleController(dest_y);
+                roll = angleController(displacements.at(3));
+            }
+            else if(distances.at(2) >= 0 && distances.at(3) < 0) { //South is blocked but East is free
+                pitch = angleController(displacements.at(2));
+                roll = angleController(dest_x);
+            }
+            else { // SouthEast is blocked
+                pitch = angleController(displacements.at(2));
+                roll = angleController(displacements.at(3));
+            }
+        }
+        else{
+            if(distances.at(2) < 0) {
+                pitch = angleController(dest_y);
                 roll = DEFAULT_ROLL;
             }
-            else {}
-        }
-        else if(y_dir == "West"){
-            if(distances.at(2) == 0 && distances.at(3) == 0) {
-                pitch = DEFAULT_PITCH;
+            else {
+                pitch = angleController(displacements.at(2));
                 roll = DEFAULT_ROLL;
             }
-            else {}
         }
-        else{}
     }
     else {
         if(y_dir == "East") {
-            if(distances.at(1) == 0) {
+            if(distances.at(1) < 0) {
                 pitch = DEFAULT_PITCH;
-                roll = DEFAULT_ROLL;
+                roll = angleController(x_dest);
             }
-            else {}
+            else {
+                pitch = DEFAULT_PITCH;
+                roll = angleController(displacements.at(1));
+            }
         }
         else if(y_dir == "West"){
-            if(distances.at(3) == 0) {
+            if(distances.at(3) < 0) {
                 pitch = DEFAULT_PITCH;
-                roll = DEFAULT_ROLL;
+                roll = angleController(x_dest);
             }
-            else {}
+            else {
+                pitch = DEFAULT_PITCH;
+                roll = angleController(displacements.at(3));
+            }
         }
         else { //Destination reached!
             qDebug() << "Destination Reached!";
             pitch = DEFAULT_PITCH;
-            roll = DEFAULT_ROLLF;
+            roll = DEFAULT_ROLL;
         }
     }
 
-    // PID
+}
 
+float AIObject::angleController(int destination)
+{
+    float angle = 0.0;
+    float error = destination;
+    float derivative;
+    if(abs(error) > 0.01) {
+        integral += (error+prevError)*da;
+        if( integral > 100) {
+            integral = 100;
+        }
+        if( integral < 0 ) {
+            integral = 0;
+        }
+    }
+    derivative = (error - prevError) / da;
+    angle = error*kp + integral*ki + derivative*kd;
+
+    if( angle > 30 ) {
+        angle = 30;
+    }
+    if( angle < 0 ) {
+        angle = 0.001;
+    }
+
+    prevError = error;
+
+    return angle;
 }

@@ -15,14 +15,18 @@ class AIObject
 public:
     AIObject(int, int, int);
     bool setDestination(int, int);
-    void getTargetAngles(float&, float&, int, int);
+    void getTargetAngles(double&, double&, int, int);
 private:
+    float angleController(int);
     void pop_environment();
     QList<int> scan(int, int, QString);
 
+    float error;
     int scan_N;
     int environment[600][600], cur_x, cur_y, prev_x, prev_y, arm_len, dest_x, dest_y;
-    int stop;
+    float kp, ki, kd, da;
+    double angle;
+    float prevError, integral;
 };
 
 #endif // AIOBJECT_H
