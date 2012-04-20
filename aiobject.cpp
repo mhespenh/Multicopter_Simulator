@@ -750,7 +750,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         if(y_dir == "East") {
             if(distances.at(1) < 0) {
                 pitch = DEFAULT_PITCH;
-                roll = angleController(x_dest);
+                roll = angleController(dest_x);
             }
             else {
                 pitch = DEFAULT_PITCH;
@@ -760,7 +760,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         else if(y_dir == "West"){
             if(distances.at(3) < 0) {
                 pitch = DEFAULT_PITCH;
-                roll = angleController(x_dest);
+                roll = angleController(dest_x);
             }
             else {
                 pitch = DEFAULT_PITCH;
