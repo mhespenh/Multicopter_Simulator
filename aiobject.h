@@ -2,8 +2,8 @@
 #define AIOBJECT_H
 
 #define ENVSIZE 600
-#define DEFAULT_PITCH 10.0
-#define DEFAULT_ROLL 10.0
+#define DEFAULT_PITCH 0.0
+#define DEFAULT_ROLL 0.0
 
 #include<QDebug>
 #include<QList>
