@@ -9,6 +9,8 @@ CONFIG += qdbus
 CONFIG -= app_bundle
 TEMPLATE = app
 SOURCES += main.cpp \
-    MulticopterSimulator.cpp
-HEADERS += MulticopterSimulator.h
+    MulticopterSimulator.cpp \
+    aiobject.cpp
+HEADERS += MulticopterSimulator.h \
+    aiobject.h
 OTHER_FILES += README
