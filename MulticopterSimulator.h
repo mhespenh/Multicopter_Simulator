@@ -33,9 +33,16 @@ public slots:
     void recvMessage(QString);
     void processStarted(QString);
 
+private slots:
+    void updatePhysics(void);
+
 private:
     void sendDbusMessage(QString, int);
+    void sendUpdateMsg(double , double , double);
     bool writeSharedMem();
+    double pitch, roll, altitude, dt;
+    int cur_x, cur_y;
+    int* throttles;
     QProcess* proc;
     QProcess* procs;
     QDBusConnection bus;
