@@ -1,7 +1,7 @@
 #ifndef AIOBJECT_H
 #define AIOBJECT_H
 
-#define ENVSIZE 400
+#define ENVSIZE 600
 #define DEFAULT_PITCH 0.0
 #define DEFAULT_ROLL 0.0
 

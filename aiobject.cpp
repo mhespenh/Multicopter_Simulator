@@ -6,7 +6,7 @@ AIObject::AIObject()
     dest_y = 0;
     kp = 0.00003;//.00001;     //proportional gain
     ki = 0;//-.0000013;   //integral gain
-    kd = .0083;  //derivative gain
+    kd = .0093;  //derivative gain
     da = .01;     //simulation angle
     angle = 0.0;
     angle2 = 0.0;
@@ -639,7 +639,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y) {
     this->cur_x = x;
     this->cur_y = y;
     pitch = pitchAngleController(this->dest_y);
-    roll = rollAngleController(this->dest_y);
+    roll = rollAngleController(this->dest_x);
 }
 
 /*
@@ -836,8 +836,8 @@ float AIObject::pitchAngleController(int destination)
     }
 
     prevError = error;
-    qDebug() << "At y: " << cur_y << "target: " << destination << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
-    qDebug() << "Error: " << error;
+//    qDebug() << "At y: " << cur_y << "target: " << destination << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
+//    qDebug() << "Error: " << error;
  //   qDebug() << "Pitch set" << angle;
 
     return angle;

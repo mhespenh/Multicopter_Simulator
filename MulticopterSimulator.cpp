@@ -120,7 +120,7 @@ void MulticopterSimulator::getAngles() {
         sy *= -1;
     }
     if( (target_x-cur_x) < 0 ) {
-        sy *= -1;
+        sx *= -1;
     }
     theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
     tx = abs(target_x-cur_x) > 20 ? cur_x+sx : target_x;
