@@ -42,7 +42,10 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         QString n_string = QString::number(numProcs);
         args << n_string; //how many are there?
         //start the process
+
+/*** UPDATE THE NEXT LINE TO POINT TO THE CORRECT PATH ON YOUR SYSTEM! ***/
         procs[i].start("/home/mhespenh/Desktop/Project2/SimMotor/SimMotor", args);
+/*** DID YOU UPDATE THE LINE ABOVE?  WE THEN D D D DO IT, TIMMY ***/
         qDebug() << "Motor process " << i << " started";
         args.pop_front(); //pop off the args
         args.pop_front(); //so we can use it for the next one
@@ -50,6 +53,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         //connect exiting slot at some point
     }
 
+    //init a bunch of stuff
     targetPitch = 0;     //in degrees
     targetRoll  = 0;     //in degrees
     targetAltitude = 10; //in meters
@@ -67,8 +71,8 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     v_y = 0;
     v_z = 0;
 
-    tx = 0;
-    ty = 0;
+    tx = 0; //temp target x
+    ty = 0; //and y
 
     mass = 1;       //in kg
     gravity = 9.8;  //in m/s^2
@@ -85,6 +89,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         }
      }
 
+    //Set up the AI
     theAI.setArmLength(armLength);
     qDebug() << theAI.setDestination(target_x, target_y);
 
@@ -113,19 +118,22 @@ MulticopterSimulator::~MulticopterSimulator() {
     delete procs;
 }
 
+//We need to limit the size of the updates given to the AI
+// otherwise the PID controller goes all wonky.  So if the
+// target is more than 20, just go 20 at a time till we get there
 void MulticopterSimulator::getAngles() {
     int sx = 20;
     int sy = 20;
     if( (target_y-cur_y) < 0 ) {
-        sy *= -1;
+        sy *= -1;   //invert if target is "below" us
     }
     if( (target_x-cur_x) < 0 ) {
-        sx *= -1;
+        sx *= -1;   //invert if target is "behind" us
     }
     theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
-    tx = abs(target_x-cur_x) > 20 ? cur_x+sx : target_x;
-    ty = abs(target_y-cur_y) > 20 ? cur_y+sy : target_y;
-    theAI.setDestination(tx, ty);
+    tx = abs(target_x-cur_x) > 20 ? cur_x+sx : target_x; //20 at a time
+    ty = abs(target_y-cur_y) > 20 ? cur_y+sy : target_y; //til we get there
+    theAI.setDestination(tx, ty); //send the update
 }
 
 void MulticopterSimulator::setGravity(float grav) {
@@ -140,32 +148,40 @@ void MulticopterSimulator::setMass(float mass) {
     this->mass = mass;
 }
 
+void MulticopterSimulator::setAltitude(float alt) {
+    this->targetAltitude = alt;
+}
+
 void MulticopterSimulator::setTargetPosition(int x, int y) {
     this->target_x = x;
     this->target_y = y;
 }
 
+//depreciated, left fo debugging
 void MulticopterSimulator::recvMessage(QString msg) {
     qDebug() << "Received from motor process (DBus):   " << msg;
 }
 
+//get throttle positions from motors
+// this is a slot hit by the dbus
 void MulticopterSimulator::recvUpdate(int motorNum, double throttle) {
 //    qDebug() << "Received from motor process (DBus):   Motor: " << motorNum << " throttle: " << throttle;
     throttles[motorNum] = throttle;
 }
 
+//depreciated, left fo debugging
 void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
     QDBusMessage out = QDBusMessage::createSignal("/", "edu.vt.ece.msg", "msg");
     out << msg << type;
     bus.send(out);
 }
 
+//Send new targets to motors (dbus broadcast)
 void MulticopterSimulator::sendAngleUpdate(double targetPitch, double targetRoll, double targetAltitude) {
     QDBusMessage update = QDBusMessage::createSignal("/", "edu.vt.ece.updateAngles", "updateAngles");
     update << curPitch << curRoll << curAltitude << targetPitch << targetRoll << targetAltitude;
     bus.send(update);
 }
-
 
 //I've added in some "fake" torque effects here by including an armLength
 // scaling value on the pitch and roll calculations.  It makes it quicker
@@ -178,6 +194,9 @@ void MulticopterSimulator::updatePhysics() {
     double curPitchRad = deg2rad(curPitch);
     double curRollRad  = deg2rad(curRoll);
 
+    //all this fancy trig says is: apply the appropriate amount of force
+    // in the x and y planes based on pitch and roll angles (more we angle,
+    //  the less thrust the motor has in a given plane)
     for(int i=0; i<numMotors; i++) {
         motorPosition = (((360/numMotors) * (i))) * (PI/180);
         curPitch += dt*(sin(motorPosition)*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad))*(1/armLength);
@@ -190,7 +209,7 @@ void MulticopterSimulator::updatePhysics() {
     targetPitch = targetPitch > 30 ? 30 : targetPitch;
     targetRoll = targetRoll > 30 ? 30 : targetRoll;
 /*
-    if( curAltitude < armLength ) {
+    if( curAltitude < armLength ) { //not really needed
         targetPitch = targetPitch > 5 ? 5 : targetPitch;
         targetRoll = targetRoll > 5 ? 5: targetRoll;
     }
@@ -202,10 +221,12 @@ void MulticopterSimulator::updatePhysics() {
             << "Alt (" << targetAltitude << "," << curAltitude << ")"
             << "x,y" << target_x << "," << target_y << " tx,ty " << tx << "," << ty;
 #endif
-    updatePosition();
-    sendAngleUpdate(targetPitch, targetRoll, targetAltitude);
+    updatePosition();   //update our position based on new angles
+    sendAngleUpdate(targetPitch, targetRoll, targetAltitude); //update the AI
 }
 
+//Calculates our x and y positions and velocities based on
+// the angles and elapsed time (dt)
 void MulticopterSimulator::updatePosition() {
     cur_x += curRoll * dt;
     cur_y += curPitch * dt;
@@ -220,17 +241,18 @@ void MulticopterSimulator::updatePosition() {
 #endif
 }
 
+//Received from a motor on successful start.  Mostly for debugging.
 void MulticopterSimulator::processStarted(QString reply) {
     qDebug() << "Received from motor process (DBus) Start:   " << reply;
     procCount++;
 }
 
+//Received from a motor on exit.  Mostly for debugging.
 void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
     qDebug() << "Motor Process Exited with status:     " << bar << "/" << foo;
-    qDebug() << "So we'll quit too.";
-    QCoreApplication::quit();
 }
 
+//Write to the shared memory space the GUI has accesss to
 void MulticopterSimulator::writeSharedMem() {
     if (!sharedMem.isAttached()) { //if not attached
         if(!sharedMem.attach()) {  //attach
@@ -249,7 +271,8 @@ void MulticopterSimulator::writeSharedMem() {
     data* theData;
 
     sharedMem.lock(); //lock the shared memory mutex
-    theData = (data*)sharedMem.data();
+    theData = (data*)sharedMem.data(); //ptr to the shared memory data
+    //write it all out
     theData->t0 = (int)throttles[0];
     theData->t1 = (int)throttles[1];
     theData->t2 = (int)throttles[2];

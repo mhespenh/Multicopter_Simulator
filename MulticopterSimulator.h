@@ -31,6 +31,7 @@ public:
     void setMass(float);
     void setGravity(float);
     void setArmLength(float);
+    void setAltitude(float);
 
 signals:
 
@@ -50,6 +51,7 @@ private:
     void updatePosition(void);
     void sendDbusMessage(QString, int);
     void sendAngleUpdate(double , double , double);
+
     double curPitch, curRoll, curAltitude, dt;
     double targetPitch, targetRoll, targetAltitude;
     double v_x, v_y, v_z; //velocity in the x and y plane

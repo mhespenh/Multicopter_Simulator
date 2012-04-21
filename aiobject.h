@@ -18,7 +18,6 @@ public:
     void getTargetAngles(double&, double&, int, int);
     void setArmLength(double);
 
-
 private:
     float pitchAngleController(int);
     float rollAngleController(int);

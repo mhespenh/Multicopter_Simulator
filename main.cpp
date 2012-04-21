@@ -18,7 +18,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    MulticopterSimulator sim(4);
-    a.exec();
+    MulticopterSimulator sim(4); //change the number of motors here
+    a.exec();                    //default is 4.  More = more stable
 }
 
