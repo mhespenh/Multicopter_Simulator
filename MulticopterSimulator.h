@@ -19,7 +19,7 @@
 struct data {
     int t0, t1, t2, t3;
     int cur_x, cur_y, target_x, target_y;
-    double pitch, roll, altitude, v_x, v_y;
+    double pitch, roll, altitude, v_x, v_y, v_z;
 };
 
 class MulticopterSimulator : public QObject
@@ -52,8 +52,8 @@ private:
     void sendAngleUpdate(double , double , double);
     double curPitch, curRoll, curAltitude, dt;
     double targetPitch, targetRoll, targetAltitude;
-    double v_x, v_y; //velocity in the x and y plane
-    double cur_x, cur_y, prev_x, prev_y; //positions
+    double v_x, v_y, v_z; //velocity in the x and y plane
+    double cur_x, cur_y, prev_x, prev_y, prev_alt; //positions
     int target_x, target_y, numMotors; //number of motors
     double* throttles; //pointer to throttle values
     float mass, gravity, armLength; //things
@@ -62,5 +62,5 @@ private:
     QProcess* procs;
     QDBusConnection bus;
     QSharedMemory sharedMem;
-    AIObject theAI;
+//    AIObject theAI;
 };
