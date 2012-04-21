@@ -13,9 +13,12 @@
 class AIObject
 {
 public:
-    AIObject(int, int, int);
+    AIObject();
     bool setDestination(int, int);
     void getTargetAngles(double&, double&, int, int);
+    void setArmLength(double);
+
+
 private:
     float angleController(int);
     void pop_environment();

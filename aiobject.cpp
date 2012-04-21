@@ -1,10 +1,7 @@
 #include "aiobject.h"
 
-AIObject::AIObject(int start_x, int start_y, int arm_length)
+AIObject::AIObject()
 {
-    arm_len = arm_length;
-    cur_x = start_x;
-    cur_y = start_y;
     dest_x = 400;
     dest_y = 400;
     kp = 5;     //proportional gain
@@ -62,12 +59,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 4; x >= -4; x--) {
             for(int y = 15; y >= 12; y--) {
                 if(environment[x_val + x][y_val + y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val+y)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val + y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x - 1][y_val + y]){
@@ -75,7 +72,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x - (1 + new_arm);
                             desired_y = y_val + y;
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -89,17 +86,17 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 3; x >= -3; x--) {
             for(int y = 11; y >= 8; y--) {
                 if(environment[x_val + x][y_val + y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val+y)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val + y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
                     }
                     if(!environment[x_val + x - 1][y_val + y]){
                         desired_x = x_val + x - (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -113,17 +110,17 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 2; x >= -2; x--) {
             for(int y = 7; y >= 4; y--) {
                 if(environment[x_val + x][y_val + y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val+y)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val + y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
                     }
                     if(!environment[x_val + x - 1][y_val + y]){
                         desired_x = x_val + x - (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -137,17 +134,17 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 1; x >= -1; x--) {
             for(int y = 3; y >= 1; y--) {
                 if(environment[x_val + x][y_val + y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val+y)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val + y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is an eastern side!";
                     }
                     if(!environment[x_val + x - 1][y_val + y]){
                         desired_x = x_val + x - (1 + new_arm);
                         desired_y = y_val + y;
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -160,17 +157,17 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
 
         for(int y = 15; y >= 1; y--) {
             if(environment[x_val][y_val + y] || (x_val>=ENVSIZE) || (x_val<=0) || ((y_val+y)>=ENVSIZE)){
-                qDebug() <<  "(" << x_val << "," << y_val+y << ") is occupied";
+                //qDebug() <<  "(" << x_val << "," << y_val+y << ") is occupied";
                 // Check for corners //
                 if(!environment[x_val + 1][y_val + y]) {
                     desired_x = x_val + (1 + new_arm);
                     desired_y = y_val + y;
-                    qDebug() << "(" << x_val << "," << y_val + y << ") is an eastern side!";
+                    //qDebug() << "(" << x_val << "," << y_val + y << ") is an eastern side!";
                 }
                 if(!environment[x_val - 1][y_val + y]){
                     desired_x = x_val - (1 + new_arm);
                     desired_y = y_val + y;
-                    qDebug() << "(" << x_val << "," << y_val + y << ") is a western side!";
+                    //qDebug() << "(" << x_val << "," << y_val + y << ") is a western side!";
                 }
                 ///////////////////////
                 if(obs_distance >= 0) {
@@ -191,12 +188,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 4; y >= -4; y--) {
             for(int x = 15; x >= 12; x--) {
                 if(environment[x_val + x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val+x)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x][y_val + y + 1]) {
                         desired_x = x_val + x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x][y_val + y - 1]){
@@ -204,7 +201,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -218,12 +215,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 3; y >= -3; y--) {
             for(int x = 15; x >= 8; x--) {
                 if(environment[x_val + x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val+x)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x][y_val + y + 1]) {
                         desired_x = x_val + x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x][y_val + y - 1]){
@@ -231,7 +228,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -245,12 +242,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 2; y >= -2; y--) {
             for(int x = 15; x >= 4; x--) {
                 if(environment[x_val + x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val+x)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x][y_val + y + 1]) {
                         desired_x = x_val + x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x][y_val + y - 1]){
@@ -258,7 +255,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -272,12 +269,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 1; y >= -1; y--) {
             for(int x = 15; x >= 1; x--) {
                 if(environment[x_val + x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val+x)>=ENVSIZE)){
-                    qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val + x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x][y_val + y + 1]) {
                         desired_x = x_val + x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x][y_val + y - 1]){
@@ -285,7 +282,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -298,12 +295,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
 
         for(int x = 15; x >= 1; x--) {
             if(environment[x_val + x][y_val] || (y_val>=ENVSIZE) || (y_val<=0) || ((x_val+x)>=ENVSIZE)){
-                qDebug() <<  "(" << x_val + x << "," << y_val << ") is occupied";
+                //qDebug() <<  "(" << x_val + x << "," << y_val << ") is occupied";
                 // Check for corners //
                 if(!environment[x_val + x][y_val + 1]) {
                     desired_x = x_val + x;
                     desired_y = y_val + (1 + new_arm);
-                    qDebug() << "(" << x_val + x << "," << y_val << ") is a northern side!";
+                    //qDebug() << "(" << x_val + x << "," << y_val << ") is a northern side!";
                     corner_found = true;
                 }
                 if(!environment[x_val + x][y_val - 1]){
@@ -311,7 +308,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                         desired_x = x_val + x;
                         desired_y = y_val - new_arm;
                     }
-                    qDebug() << "(" << x_val + x << "," << y_val << ") is a southern side!";
+                    //qDebug() << "(" << x_val + x << "," << y_val << ") is a southern side!";
                 }
                 ///////////////////////
                 if(obs_distance >= 0) {
@@ -332,12 +329,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 4; x >= -4; x--) {
             for(int y = 15; y >= 12; y--) {
                 if(environment[x_val + x][y_val - y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val-y)<=0)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val - y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val - y;
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x - 1][y_val - y]){
@@ -345,7 +342,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x - (1 + new_arm);
                             desired_y = y_val - y;
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -359,12 +356,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 3; x >= -3; x--) {
             for(int y = 15; y >= 8; y--) {
                 if(environment[x_val + x][y_val - y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val-y)<=0)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val - y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val - y;
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x - 1][y_val - y]){
@@ -372,7 +369,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x - (1 + new_arm);
                             desired_y = y_val - y;
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -386,12 +383,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 2; x >= -2; x--) {
             for(int y = 15; y >= 4; y--) {
                 if(environment[x_val + x][y_val - y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val-y)<=0)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val - y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val - y;
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x - 1][y_val - y]){
@@ -399,7 +396,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x - (1 + new_arm);
                             desired_y = y_val - y;
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -413,12 +410,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int x = 1; x >= -1; x--) {
             for(int y = 15; y >= 1; y--) {
                 if(environment[x_val + x][y_val - y] || ((x_val+x)>=ENVSIZE) || ((x_val+x)<=0) || ((y_val-y)<=0)){
-                    qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
+                    //qDebug() <<  "(" << x_val+x << "," << y_val-y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val + x + 1][y_val - y]) {
                         desired_x = x_val + x + (1 + new_arm);
                         desired_y = y_val - y;
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is an eastern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val + x - 1][y_val - y]){
@@ -426,7 +423,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val + x - (1 + new_arm);
                             desired_y = y_val - y;
                         }
-                        qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
+                        //qDebug() << "(" << x_val + x << "," << y_val - y << ") is a western side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -439,12 +436,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
 
         for(int y = 15; y >= 1; y--) {
             if(environment[x_val][y_val - y] || (x_val>=ENVSIZE) || (x_val<=0) || ((y_val-y)<=0)){
-                qDebug() <<  "(" << x_val << "," << y_val-y << ") is occupied";
+                //qDebug() <<  "(" << x_val << "," << y_val-y << ") is occupied";
                 // Check for corners //
                 if(!environment[x_val + 1][y_val - y]) {
                     desired_x = x_val + (1 + new_arm);
                     desired_y = y_val - y;
-                    qDebug() << "(" << x_val << "," << y_val - y << ") is an eastern side!";
+                    //qDebug() << "(" << x_val << "," << y_val - y << ") is an eastern side!";
                     corner_found = true;
                 }
                 if(!environment[x_val - 1][y_val - y]){
@@ -452,7 +449,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                         desired_x = x_val - (1 + new_arm);
                         desired_y = y_val - y;
                     }
-                    qDebug() << "(" << x_val << "," << y_val - y << ") is a western side!";
+                    //qDebug() << "(" << x_val << "," << y_val - y << ") is a western side!";
                 }
                 ///////////////////////
                 if(obs_distance >= 0) {
@@ -473,12 +470,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 4; y >= -4; y--) {
             for(int x = 15; x >= 12; x--) {
                 if(environment[x_val - x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val-x)<=0)){
-                    qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val - x][y_val + y + 1]) {
                         desired_x = x_val - x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val - x][y_val + y - 1]){
@@ -486,7 +483,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val - x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -500,12 +497,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 3; y >= -3; y--) {
             for(int x = 11; x >= 8; x--) {
                 if(environment[x_val - x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val-x)<=0)){
-                    qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val - x][y_val + y + 1]) {
                         desired_x = x_val - x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val - x][y_val + y - 1]){
@@ -513,7 +510,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val - x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -527,12 +524,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 2; y >= -2; y--) {
             for(int x = 7; x >= 4; x--) {
                 if(environment[x_val - x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val-x)<=0)){
-                    qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val - x][y_val + y + 1]) {
                         desired_x = x_val - x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val - x][y_val + y - 1]){
@@ -540,7 +537,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val - x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -554,12 +551,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
         for(int y = 1; y >= -1; y--) {
             for(int x = 3; x >= 1; x--) {
                 if(environment[x_val - x][y_val + y] || ((y_val+y)>=ENVSIZE) || ((y_val+y)<=0) || ((x_val-x)<=0)){
-                    qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
+                    //qDebug() <<  "(" << x_val - x << "," << y_val+y << ") is occupied";
                     // Check for corners //
                     if(!environment[x_val - x][y_val + y + 1]) {
                         desired_x = x_val - x;
                         desired_y = y_val + y + (1 + new_arm);
-                        qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val + y << ") is a northern side!";
                         corner_found = true;
                     }
                     if(!environment[x_val - x][y_val + y - 1]){
@@ -567,7 +564,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                             desired_x = x_val - x;
                             desired_y = y_val - (y + new_arm);
                         }
-                        qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
+                        //qDebug() << "(" << x_val - x << "," << y_val - y << ") is a southern side!";
                     }
                     ///////////////////////
                     if(obs_distance >= 0) {
@@ -580,12 +577,12 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
 
         for(int x = 15; x >= 1; x--) {
             if(environment[x_val - x][y_val] || ((y_val)>=ENVSIZE) || ((y_val)<=0) || ((x_val-x)<=0)){
-                qDebug() <<  "(" << x_val - x << "," << y_val << ") is occupied";
+                //qDebug() <<  "(" << x_val - x << "," << y_val << ") is occupied";
                 // Check for corners //
                 if(!environment[x_val - x][y_val + 1]) {
                     desired_x = x_val - x;
                     desired_y = y_val + (1 + new_arm);
-                    qDebug() << "(" << x_val - x << "," << y_val << ") is a northern side!";
+                    //qDebug() << "(" << x_val - x << "," << y_val << ") is a northern side!";
                     corner_found = true;
                 }
                 if(!environment[x_val - x][y_val - 1]){
@@ -593,7 +590,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
                         desired_x = x_val - x;
                         desired_y = y_val - new_arm;
                     }
-                    qDebug() << "(" << x_val - x << "," << y_val << ") is a southern side!";
+                    //qDebug() << "(" << x_val - x << "," << y_val << ") is a southern side!";
                 }
                 ///////////////////////
                 if(obs_distance >= 0) {
@@ -607,7 +604,7 @@ QList<int> AIObject::scan(int x, int y, QString arm_dir) // arm_dir --> N,E,S,W
     }
 
     if(environment[x_val][y_val] || (x_val>=ENVSIZE) || (x_val<=0) || (y_val>=ENVSIZE) || (y_val<=0)) obs_distance = 0;
-    qDebug() << y_dir << x_dir;
+    //qDebug() << y_dir << x_dir;
     qDebug() << "(" << desired_x << "," << desired_y << ")";
     retValues << obs_distance << displacement;
     return retValues;
@@ -626,7 +623,7 @@ bool AIObject::setDestination(int x, int y)
 
 void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
 {
-
+    qDebug() << "recvd - " << pitch << "," << roll;
     QList<int> distances, displacements;
     QString x_dir, y_dir;
     cur_x = x;
@@ -771,9 +768,14 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             qDebug() << "Destination Reached!";
             pitch = DEFAULT_PITCH;
             roll = DEFAULT_ROLL;
+            while(1);
         }
     }
 
+}
+
+void AIObject::setArmLength(double armLength) {
+    this->arm_len = armLength;
 }
 
 float AIObject::angleController(int destination)

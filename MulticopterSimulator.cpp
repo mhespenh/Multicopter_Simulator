@@ -21,7 +21,7 @@ double deg2rad(double deg) {
 }
 
 MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
-    QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PRIVATE_SHARED")
+    QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PUBIC_SHARED_MEM")
 {
     procs = new QProcess[numProcs];
     throttles = new double[numProcs];
@@ -34,7 +34,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
 
     numMotors = numProcs;
     procCount = 0;
-    dt = 0.01;     //simulation time step (in ms)
+    dt = 0.01;     //simulation time step (in SECONDS) default is 10ms
 
     for(int i=0; i<numProcs; i++) {
         QString i_string = QString::number(i);
@@ -52,10 +52,12 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
 
     targetPitch = 0;     //in degrees
     targetRoll  = 0;     //in degrees
-    targetAltitude = 0; //in meters
+    targetAltitude = 10; //in meters
     curPitch = 0;
     curRoll = 0;
     curAltitude = 0;
+    target_x = 200;
+    target_y = 200;
     cur_x = 0;
     cur_y = 0;
     prev_x = 0;
@@ -63,14 +65,37 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     v_x = 0;
     v_y = 0;
 
-    mass = 0.5;       //in kg
+    mass = 1;       //in kg
     gravity = 9.8;  //in m/s^2
-    armLength = 1;
+    armLength = 1; //really won't work for values larger than around 5
+    
+    if (sharedMem.attach()) {
+        sharedMem.detach();
+    }
+    else {
+        if(!sharedMem.create(sizeof(data))) {
+            qDebug() << sharedMem.errorString();
+            qDebug() << "Unable to create shared memory space";
+            while(1);
+        }
+     }
 
-    //wait for all processes to start
+    theAI.setArmLength(armLength);
+    qDebug() << theAI.setDestination(target_x, target_y);
+
+    QTimer *aiTimer = new QTimer(this);
+    connect(aiTimer, SIGNAL(timeout()), this, SLOT(getAngles()));
+    aiTimer->start(100); //100ms timer
+
+    //timer to trigger physics refresh
     QTimer *physicsTimer = new QTimer(this);
     connect(physicsTimer, SIGNAL(timeout()), this, SLOT(updatePhysics()));
     physicsTimer->start(dt*1000); //10ms timer
+
+    //timer to trigger a write to shared memory
+    QTimer *sharedMemTimer = new QTimer(this);
+    connect(sharedMemTimer, SIGNAL(timeout()), this, SLOT(writeSharedMem()));
+    sharedMemTimer->start(100); //100ms timer
 }
 
 
@@ -80,6 +105,10 @@ MulticopterSimulator::~MulticopterSimulator() {
     sharedMem.deleteLater();
     delete throttles;
     delete procs;
+}
+
+void MulticopterSimulator::getAngles() {
+    theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
 }
 
 void MulticopterSimulator::setGravity(float grav) {
@@ -92,6 +121,11 @@ void MulticopterSimulator::setArmLength(float length) {
 
 void MulticopterSimulator::setMass(float mass) {
     this->mass = mass;
+}
+
+void MulticopterSimulator::setTargetPosition(int x, int y) {
+    this->target_x = x;
+    this->target_y = y;
 }
 
 void MulticopterSimulator::recvMessage(QString msg) {
@@ -115,6 +149,11 @@ void MulticopterSimulator::sendAngleUpdate(double targetPitch, double targetRoll
     bus.send(update);
 }
 
+
+//I've added in some "fake" torque effects here by including an armLength
+// scaling value on the pitch and roll calculations.  It makes it quicker
+// to react to changes the smaller the arm length, but it will also make it
+// more unstable.  Such is life.
 void MulticopterSimulator::updatePhysics() {
     double motorPosition = 0;
 
@@ -124,26 +163,26 @@ void MulticopterSimulator::updatePhysics() {
             << "Alt (" << targetAltitude << "," << curAltitude << ")";
 #endif
 
-    for(int i=0; i<4; i++)
-        throttles[i] -= mass*gravity;
+    double f_grav = mass*gravity*3;
 
     double curPitchRad = deg2rad(curPitch);
     double curRollRad  = deg2rad(curRoll);
 
     for(int i=0; i<numMotors; i++) {
         motorPosition = (((360/numMotors) * (i))) * (PI/180);
-        curPitch += dt*(sin(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
-        curRoll  += dt*(cos(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
-        curAltitude += dt*throttles[i]*cos(curPitchRad)*cos(curRollRad);
+        curPitch += dt*(sin(motorPosition)*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad))*(1/armLength);
+        curRoll  += dt*(cos(motorPosition)*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad))*(1/armLength);
+        curAltitude += dt*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad);
     }
 
+    //limiting- don't let the AI do anything too crazy
     curAltitude = curAltitude < 0 ? 0 : curAltitude;
     targetPitch = targetPitch > 30 ? 30 : targetPitch;
     targetRoll = targetRoll > 30 ? 30 : targetRoll;
 
     if( curAltitude < armLength ) {
-        targetPitch = 0;
-        targetRoll = 0;
+        targetPitch = targetPitch > 5 ? 5 : targetPitch;
+        targetRoll = targetRoll > 5 ? 5: targetRoll;
     }
 
     updatePosition();
@@ -173,22 +212,39 @@ void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
     QCoreApplication::quit();
 }
 
-bool MulticopterSimulator::writeSharedMem() {
-    if (sharedMem.isAttached()) {
-        sharedMem.detach();
+void MulticopterSimulator::writeSharedMem() {
+    if (!sharedMem.isAttached()) { //if not attached
+        if(!sharedMem.attach()) {  //attach
+            if(!sharedMem.create(sizeof(data))) { //if that fails, try to create
+                qDebug() << sharedMem.errorString(); //if can't create
+                qDebug() << "Unable to create shared memory space";
+                while(1); //we're screwed
+                if(!sharedMem.isAttached()) { //then try to reconnect if no attached
+                    qDebug() << sharedMem.errorString(); //if that fails give up
+                    qDebug() << "Unable to attach to shared memory space";
+                    while(1);
+                }
+            }
+        }
     }
     data* theData;
 
-     if (!sharedMem.create(sizeof(data))) {
-         return false;
-     }
-     sharedMem.lock();
-     theData = (data*)sharedMem.data();
-     theData->t0 = 5;
-     theData->t1 = 66;
-     theData->t2 = 77;
-     theData->t3 = 8;
-     sharedMem.unlock();
-     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;
-     return true;
+    sharedMem.lock(); //lock the shared memory mutex
+    theData = (data*)sharedMem.data();
+    theData->t0 = (int)throttles[0];
+    theData->t1 = (int)throttles[1];
+    theData->t2 = (int)throttles[2];
+    theData->t3 = (int)throttles[3];
+    theData->pitch = this->curPitch;
+    theData->roll = this->curRoll;
+    theData->altitude = this->curAltitude;
+    theData->cur_x = (int)this->cur_x;
+    theData->cur_y = (int)this->cur_y;
+    theData->target_x = (int)this->target_x;
+    theData->target_y = (int)this->target_y;
+    theData->v_x = this->v_x;
+    theData->v_y = this->v_y;
+    sharedMem.unlock(); //release mutex lock
+
+    qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;
 }
