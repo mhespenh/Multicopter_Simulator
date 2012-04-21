@@ -29,8 +29,8 @@ private:
     int scan_N;
     int environment[ENVSIZE][ENVSIZE], cur_x, cur_y, prev_x, prev_y, dest_x, dest_y, arm_len;
     float kp, ki, kd, da;
-    double angle;
-    float prevError, integral;
+    double angle, angle2;
+    float prevError, integral, prevError2, integral2;
 };
 
 #endif // AIOBJECT_H
