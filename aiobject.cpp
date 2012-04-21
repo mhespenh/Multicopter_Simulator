@@ -671,7 +671,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         if(x_dir == "East") { //Need to head East!
             //qDebug() << "Heading NorthEast";
             if((distances.at(0) < 0 && distances.at(1) < 0) || (displacements.at(0) == 0 && displacements.at(1) == 0)) { // NorthEast is free of obstacles
-                pitch = pitchAngleController(dest_y);
+                pitch = pitchAngleController(cur_y + 5);
                 roll = rollAngleController(cur_x + 5);
             }
             else if(distances.at(0) < 0 && distances.at(1) >= 0) { // North is free but East has obstacles
