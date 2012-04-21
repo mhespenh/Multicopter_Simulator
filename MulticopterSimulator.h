@@ -13,6 +13,8 @@
 #include <QtDBus/QtDBus>
 #include <QSharedMemory>
 
+#define PI 3.1415926535897932384626433832795028841971693993751058209
+
 struct data {
     int t0, t1, t2, t3;
 };
@@ -23,12 +25,13 @@ class MulticopterSimulator : public QObject
 public:
     explicit MulticopterSimulator(int numProcs, QObject *parent = 0);
     ~MulticopterSimulator();
+    void setMass(float);
+    void setGravity(float);
+    void setArmLength(float);
 
 signals:
 
 public slots:
-    void processError(void);
-    void processSTDOUT(void);
     void processExit(int,QProcess::ExitStatus);
     void recvMessage(QString);
     void recvUpdate(int, double);
@@ -38,13 +41,18 @@ private slots:
     void updatePhysics(void);
 
 private:
+    void updatePosition(void);
     void sendDbusMessage(QString, int);
     void sendAngleUpdate(double , double , double);
     bool writeSharedMem();
     double curPitch, curRoll, curAltitude, dt;
     double targetPitch, targetRoll, targetAltitude;
-    int cur_x, cur_y, numMotors;
+    double v_x, v_y;
+    double cur_x, cur_y, prev_x, prev_y;
+    int numMotors;
     double* throttles;
+    float mass, gravity, armLength;
+    int procCount;
     QProcess* proc;
     QProcess* procs;
     QDBusConnection bus;

@@ -6,6 +6,7 @@
   Revisions:
     03/21/2012 - Initial version (master branch)
     03/23/2012 - Implemented dbus communication correctly
+    04/20/2012 - Ready to go
 ***********************************************************************/
 
 #include "MulticopterSimulator.h"
@@ -13,7 +14,11 @@
 #include <QDebug>
 #include <QDBusArgument>
 
-#define PI 3.14159265
+#define DEBUG
+
+double deg2rad(double deg) {
+    return deg*(PI/180);
+}
 
 MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PRIVATE_SHARED")
@@ -27,6 +32,10 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     bus.connect("", "/", "edu.vt.ece.updateThrottle", "updateThrottle", this, SLOT(recvUpdate(int, double)));
     QStringList args;
 
+    numMotors = numProcs;
+    procCount = 0;
+    dt = 0.01;     //simulation time step (in ms)
+
     for(int i=0; i<numProcs; i++) {
         QString i_string = QString::number(i);
         args << i_string; //which motor is this?
@@ -37,22 +46,33 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         qDebug() << "Motor process " << i << " started";
         args.pop_front(); //pop off the args
         args.pop_front(); //so we can use it for the next one
-        throttles[i] = 0.1;
+        throttles[i] = 0;
+        //connect exiting slot at some point
     }
-    numMotors = numProcs;
-    dt = 0.1;     //simulation time
 
     targetPitch = 0;     //in degrees
-    targetRoll  = -10;   //in degrees
-    targetAltitude = 20; //in meters
-    curPitch = 0.00001;
-    curRoll = 0.00001;
+    targetRoll  = 0;     //in degrees
+    targetAltitude = 0; //in meters
+    curPitch = 0;
+    curRoll = 0;
     curAltitude = 0;
+    cur_x = 0;
+    cur_y = 0;
+    prev_x = 0;
+    prev_y = 0;
+    v_x = 0;
+    v_y = 0;
 
+    mass = 0.5;       //in kg
+    gravity = 9.8;  //in m/s^2
+    armLength = 1;
+
+    //wait for all processes to start
     QTimer *physicsTimer = new QTimer(this);
     connect(physicsTimer, SIGNAL(timeout()), this, SLOT(updatePhysics()));
     physicsTimer->start(dt*1000); //10ms timer
 }
+
 
 MulticopterSimulator::~MulticopterSimulator() {
     qDebug() << "Cleaning up...";
@@ -62,13 +82,25 @@ MulticopterSimulator::~MulticopterSimulator() {
     delete procs;
 }
 
+void MulticopterSimulator::setGravity(float grav) {
+    this->gravity = grav;
+}
+
+void MulticopterSimulator::setArmLength(float length) {
+    this->armLength = length;
+}
+
+void MulticopterSimulator::setMass(float mass) {
+    this->mass = mass;
+}
+
 void MulticopterSimulator::recvMessage(QString msg) {
     qDebug() << "Received from motor process (DBus):   " << msg;
 }
 
 void MulticopterSimulator::recvUpdate(int motorNum, double throttle) {
 //    qDebug() << "Received from motor process (DBus):   Motor: " << motorNum << " throttle: " << throttle;
-    throttles[motorNum] = (throttle < 0.1) ? throttle=0 : throttle=throttle;
+    throttles[motorNum] = throttle;
 }
 
 void MulticopterSimulator::sendDbusMessage(QString msg, int type) {
@@ -83,60 +115,62 @@ void MulticopterSimulator::sendAngleUpdate(double targetPitch, double targetRoll
     bus.send(update);
 }
 
-double deg2rad(double deg) {
-    return deg*(PI/180);
-}
-
 void MulticopterSimulator::updatePhysics() {
     double motorPosition = 0;
 
+#ifdef DEBUG
+    qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
+    qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
+            << "Alt (" << targetAltitude << "," << curAltitude << ")";
+#endif
+
     for(int i=0; i<4; i++)
-        throttles[i] -= 20;
+        throttles[i] -= mass*gravity;
 
     double curPitchRad = deg2rad(curPitch);
     double curRollRad  = deg2rad(curRoll);
 
     for(int i=0; i<numMotors; i++) {
         motorPosition = (((360/numMotors) * (i))) * (PI/180);
-        curPitch += (sin(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
-        curRoll  += (cos(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
-  //      curAltitude += throttles[i]*cos(curPitch)*cos(curRoll) * .1;
+        curPitch += dt*(sin(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
+        curRoll  += dt*(cos(motorPosition)*throttles[i]*cos(curPitchRad)*cos(curRollRad));
+        curAltitude += dt*throttles[i]*cos(curPitchRad)*cos(curRollRad);
     }
-    curPitch *= .2;
-    curRoll  *= .2;
 
- //   curPitch += (throttles[1] - throttles[3]) * .01;
- //   curRoll  += (throttles[0] - throttles[2]) * .01;
-    curAltitude += (throttles[1]*cos(curPitchRad)*cos(curRollRad) + throttles[1]*cos(curPitchRad)*cos(curRollRad) +
-                    throttles[2]*cos(curPitchRad)*cos(curRollRad) + throttles[3]*cos(curPitchRad)*cos(curRollRad)) * .01;
+    curAltitude = curAltitude < 0 ? 0 : curAltitude;
+    targetPitch = targetPitch > 30 ? 30 : targetPitch;
+    targetRoll = targetRoll > 30 ? 30 : targetRoll;
 
-    qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
-    qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
-            << "Alt (" << targetAltitude << "," << curAltitude << ")";
+    if( curAltitude < armLength ) {
+        targetPitch = 0;
+        targetRoll = 0;
+    }
+
+    updatePosition();
     sendAngleUpdate(targetPitch, targetRoll, targetAltitude);
 }
 
-void MulticopterSimulator::processStarted(QString reply) {
-    qDebug() << "Received from motor process (DBus):   " << reply;
-    sendDbusMessage("Hello, world!", 69);
+void MulticopterSimulator::updatePosition() {
+    prev_x = cur_x;
+    prev_y = cur_y;
+    cur_x += curRoll * dt;
+    cur_y += curPitch * dt;
+    v_x = (v_x + ((cur_x-prev_x)/dt))/2;
+    v_y = (v_y + ((cur_y-prev_y)/dt))/2;
+#ifdef DEBUG
+    qDebug() << "x,y " << cur_x << "," << cur_y << " vx,vy" << v_x << "," << v_y;
+#endif
 }
 
-void MulticopterSimulator::processError() {
-    QByteArray data = proc->readAllStandardError();
-    data.chop(1); //remove the \n
-    qDebug() << "Received from motor process (STDERR): " << QString(data);
-
+void MulticopterSimulator::processStarted(QString reply) {
+    qDebug() << "Received from motor process (DBus) Start:   " << reply;
+    procCount++;
 }
 
 void MulticopterSimulator::processExit(int foo, QProcess::ExitStatus bar) {
     qDebug() << "Motor Process Exited with status:     " << bar << "/" << foo;
     qDebug() << "So we'll quit too.";
     QCoreApplication::quit();
-}
-
-void MulticopterSimulator::processSTDOUT() {
-    QByteArray data = proc->readAllStandardOutput();
-    qDebug() << "Received (STDOUT): " << QString(data);
 }
 
 bool MulticopterSimulator::writeSharedMem() {

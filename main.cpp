@@ -21,3 +21,4 @@ int main(int argc, char *argv[])
     MulticopterSimulator sim(4);
     a.exec();
 }
+
