@@ -21,7 +21,7 @@ double deg2rad(double deg) {
 }
 
 MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
-    QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PUBIC_SHARED_MEM")
+    QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PUBLIC_SHARED_MEM")
 {
     procs = new QProcess[numProcs];
     throttles = new double[numProcs];
@@ -50,8 +50,8 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         //connect exiting slot at some point
     }
 
-    targetPitch = 0;     //in degrees
-    targetRoll  = 0;     //in degrees
+    targetPitch = 20;     //in degrees
+    targetRoll  = 20;     //in degrees
     targetAltitude = 10; //in meters
     curPitch = 0;
     curRoll = 0;
@@ -62,8 +62,10 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     cur_y = 0;
     prev_x = 0;
     prev_y = 0;
+    prev_alt = 0;
     v_x = 0;
     v_y = 0;
+    v_z = 0;
 
     mass = 1;       //in kg
     gravity = 9.8;  //in m/s^2
@@ -80,13 +82,13 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         }
      }
 
-    theAI.setArmLength(armLength);
-    qDebug() << theAI.setDestination(target_x, target_y);
-
+//    theAI.setArmLength(armLength);
+//    qDebug() << theAI.setDestination(target_x, target_y);
+/*
     QTimer *aiTimer = new QTimer(this);
     connect(aiTimer, SIGNAL(timeout()), this, SLOT(getAngles()));
     aiTimer->start(100); //100ms timer
-
+*/
     //timer to trigger physics refresh
     QTimer *physicsTimer = new QTimer(this);
     connect(physicsTimer, SIGNAL(timeout()), this, SLOT(updatePhysics()));
@@ -108,7 +110,7 @@ MulticopterSimulator::~MulticopterSimulator() {
 }
 
 void MulticopterSimulator::getAngles() {
-    theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
+    //theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
 }
 
 void MulticopterSimulator::setGravity(float grav) {
@@ -156,13 +158,6 @@ void MulticopterSimulator::sendAngleUpdate(double targetPitch, double targetRoll
 // more unstable.  Such is life.
 void MulticopterSimulator::updatePhysics() {
     double motorPosition = 0;
-
-#ifdef DEBUG
-    qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
-    qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
-            << "Alt (" << targetAltitude << "," << curAltitude << ")";
-#endif
-
     double f_grav = mass*gravity*3;
 
     double curPitchRad = deg2rad(curPitch);
@@ -172,32 +167,41 @@ void MulticopterSimulator::updatePhysics() {
         motorPosition = (((360/numMotors) * (i))) * (PI/180);
         curPitch += dt*(sin(motorPosition)*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad))*(1/armLength);
         curRoll  += dt*(cos(motorPosition)*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad))*(1/armLength);
-        curAltitude += dt*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad);
+        curAltitude += dt*(throttles[i]-f_grav)*cos(curPitchRad)*cos(curRollRad)*.8;
     }
 
     //limiting- don't let the AI do anything too crazy
     curAltitude = curAltitude < 0 ? 0 : curAltitude;
     targetPitch = targetPitch > 30 ? 30 : targetPitch;
     targetRoll = targetRoll > 30 ? 30 : targetRoll;
-
+/*
     if( curAltitude < armLength ) {
         targetPitch = targetPitch > 5 ? 5 : targetPitch;
         targetRoll = targetRoll > 5 ? 5: targetRoll;
     }
+*/
+
+#ifdef DEBUG
+    qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
+    qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
+            << "Alt (" << targetAltitude << "," << curAltitude << ")";
+#endif
 
     updatePosition();
     sendAngleUpdate(targetPitch, targetRoll, targetAltitude);
 }
 
 void MulticopterSimulator::updatePosition() {
-    prev_x = cur_x;
-    prev_y = cur_y;
     cur_x += curRoll * dt;
     cur_y += curPitch * dt;
     v_x = (v_x + ((cur_x-prev_x)/dt))/2;
     v_y = (v_y + ((cur_y-prev_y)/dt))/2;
+    v_z = (v_z + ((curAltitude-prev_alt)/dt)) / 2;
+    prev_x = cur_x;
+    prev_y = cur_y;
+    prev_alt = curAltitude;
 #ifdef DEBUG
-    qDebug() << "x,y " << cur_x << "," << cur_y << " vx,vy" << v_x << "," << v_y;
+    qDebug() << "x,y " << cur_x << "," << cur_y << " vx,vy,vz" << v_x << "," << v_y << "," << v_z;
 #endif
 }
 
@@ -244,7 +248,9 @@ void MulticopterSimulator::writeSharedMem() {
     theData->target_y = (int)this->target_y;
     theData->v_x = this->v_x;
     theData->v_y = this->v_y;
+    theData->v_z = this->v_z;
     sharedMem.unlock(); //release mutex lock
-
+#ifdef DEBUG
     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;
+#endif
 }
