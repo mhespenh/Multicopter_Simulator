@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QDBusArgument>
 
-//#define DEBUG
+#define DEBUG
 
 double deg2rad(double deg) {
     return deg*(PI/180);
@@ -185,9 +185,9 @@ void MulticopterSimulator::updatePhysics() {
 #ifdef DEBUG
     qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
     qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
-            << "Alt (" << targetAltitude << "," << curAltitude << ")";
+            << "Alt (" << targetAltitude << "," << curAltitude << ")"
+            << "x,y" << target_x << "," << target_y;
 #endif
-
     updatePosition();
     sendAngleUpdate(targetPitch, targetRoll, targetAltitude);
 }
@@ -202,7 +202,7 @@ void MulticopterSimulator::updatePosition() {
     prev_y = cur_y;
     prev_alt = curAltitude;
 #ifdef DEBUG
-    qDebug() << "x,y " << cur_x << "," << cur_y << " vx,vy,vz" << v_x << "," << v_y << "," << v_z;
+    qDebug() << "x,y " << cur_x << "," << cur_y;// << " vx,vy,vz" << v_x << "," << v_y << "," << v_z;
 #endif
 }
 

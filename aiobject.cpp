@@ -4,10 +4,10 @@ AIObject::AIObject()
 {
     dest_x = 200;
     dest_y = 200;
-    kp = 5;     //proportional gain
-    ki = 1;   //integral gain
-    kd = 0.01;  //derivative gain
-    da = 0.1;     //simulation angle
+    kp = .01;     //proportional gain
+    ki = 0;   //integral gain
+    kd = 0.001;  //derivative gain
+    da = .1;     //simulation angle
     angle = 0.0;
     angle2 = 0.0;
     integral = 0.0;
@@ -671,16 +671,16 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         if(x_dir == "East") { //Need to head East!
             //qDebug() << "Heading NorthEast";
             if((distances.at(0) < 0 && distances.at(1) < 0) || (displacements.at(0) == 0 && displacements.at(1) == 0)) { // NorthEast is free of obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
-                roll = rollAngleController((dest_x - cur_x)/100);
+                pitch = pitchAngleController(dest_y);
+                roll = rollAngleController(dest_x);
             }
             else if(distances.at(0) < 0 && distances.at(1) >= 0) { // North is free but East has obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = rollAngleController(displacements.at(1));
             }
             else if(distances.at(0) >= 0 && distances.at(1) < 0) { //North is blocked but East is free
                 pitch = pitchAngleController(displacements.at(0));
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else { // NorthEast is blocked
                 pitch = pitchAngleController(displacements.at(0));
@@ -689,16 +689,16 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         }
         else if(x_dir == "West"){ //Need to head West!
             if((distances.at(0) < 0 && distances.at(3) < 0) || (displacements.at(0) == 0 && displacements.at(3) == 0)) { //No obstacle
-                pitch = pitchAngleController((dest_y - cur_y)/100);
-                roll = rollAngleController((dest_x - cur_x)/100);
+                pitch = pitchAngleController(dest_y);
+                roll = rollAngleController(dest_x);
             }
             else if(distances.at(0) < 0 && distances.at(3) >= 0) { // North is free but West has obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = rollAngleController(displacements.at(3));
             }
             else if(distances.at(0) >= 0 && distances.at(3) < 0) { //North is blocked but East is free
                 pitch = pitchAngleController(displacements.at(0));
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else { // NorthEast is blocked
                 pitch = pitchAngleController(displacements.at(0));
@@ -707,7 +707,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         }
         else{
             if((distances.at(0) < 0) || (displacements.at(0) == 0)) {
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = DEFAULT_ROLL;
             }
             else {
@@ -719,16 +719,16 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
     else if(y_dir == "South") { //Need to head South!
         if(x_dir == "East") { //Need to head East!
             if((distances.at(2) < 0 && distances.at(1) < 0) || (displacements.at(2) == 0 && displacements.at(1) == 0)) { // SouthEast is free of obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
-                roll = rollAngleController((dest_x - cur_x)/100);
+                pitch = pitchAngleController(dest_y);
+                roll = rollAngleController(dest_x);
             }
             else if(distances.at(2) < 0 && distances.at(1) >= 0) { // South is free but East has obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = rollAngleController(displacements.at(1));
             }
             else if(distances.at(2) >= 0 && distances.at(1) < 0) { //South is blocked but East is free
                 pitch = pitchAngleController(displacements.at(2));
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else { // SouthEast is blocked
                 pitch = pitchAngleController(displacements.at(2));
@@ -737,16 +737,16 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         }
         else if(x_dir == "West"){ //Need to head West!
             if((distances.at(2) < 0 && distances.at(3) < 0) || (displacements.at(2) && displacements.at(3) == 0)) { //No obstacle
-                pitch = pitchAngleController((dest_y - cur_y)/100);
-                roll = rollAngleController((dest_x - cur_x)/100);
+                pitch = pitchAngleController(dest_y);
+                roll = rollAngleController(dest_x);
             }
             else if(distances.at(2) < 0 && distances.at(3) >= 0) { // South is free but West has obstacles
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = rollAngleController(displacements.at(3));
             }
             else if(distances.at(2) >= 0 && distances.at(3) < 0) { //South is blocked but East is free
                 pitch = pitchAngleController(displacements.at(2));
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else { // SouthEast is blocked
                 pitch = pitchAngleController(displacements.at(2));
@@ -755,7 +755,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         }
         else{
             if((distances.at(2) < 0) || (displacements.at(2) == 0)) {
-                pitch = pitchAngleController((dest_y - cur_y)/100);
+                pitch = pitchAngleController(dest_y);
                 roll = DEFAULT_ROLL;
             }
             else {
@@ -768,7 +768,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         if(x_dir == "East") {
             if((distances.at(1) < 0) || (displacements.at(1) == 0)) {
                 pitch = DEFAULT_PITCH;
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else {
                 pitch = DEFAULT_PITCH;
@@ -778,7 +778,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         else if(x_dir == "West"){
             if((distances.at(3) < 0) || (displacements.at(3) == 0)) {
                 pitch = DEFAULT_PITCH;
-                roll = rollAngleController((dest_x - cur_x)/100);
+                roll = rollAngleController(dest_x);
             }
             else {
                 pitch = DEFAULT_PITCH;
@@ -826,8 +826,8 @@ float AIObject::pitchAngleController(int destination)
     }
 
     prevError = error;
-    qDebug() << "At y: " << cur_y << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
-    qDebug() << "Pitch set" << angle;
+ //   qDebug() << "At y: " << cur_y << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
+ //   qDebug() << "Pitch set" << angle;
 
     return angle;
 }
@@ -856,8 +856,8 @@ float AIObject::rollAngleController(int destination)
         angle2 = -30;
     }
 
-    qDebug() << "At y: " << cur_x << "p:" << error*kp << "i: "<< integral2*ki << "d: " << derivative*kd;
-    qDebug() << "Roll set" << angle;
+ //   qDebug() << "At y: " << cur_x << "p:" << error*kp << "i: "<< integral2*ki << "d: " << derivative*kd;
+ //   qDebug() << "Roll set" << angle;
     prevError2 = error;
 
     return angle2;
