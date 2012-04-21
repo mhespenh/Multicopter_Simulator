@@ -5,8 +5,8 @@ AIObject::AIObject()
     dest_x = 200;
     dest_y = 200;
     kp = 5;     //proportional gain
-    ki = 3;   //integral gain
-    kd = 0.05;  //derivative gain
+    ki = 1;   //integral gain
+    kd = 0.01;  //derivative gain
     da = 0.1;     //simulation angle
     angle = 0.0;
     angle2 = 0.0;
@@ -793,8 +793,6 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
         }
     }
 
-    pitch *= -1;
-    roll *= -1;
     //qDebug() << "Pitch: " << pitch;
     //qDebug() << "Roll: " << roll;
 }
@@ -805,8 +803,6 @@ void AIObject::setArmLength(double armLength) {
 
 float AIObject::pitchAngleController(int destination)
 {
-
-    //qDebug() << "Error: " << destination - cur_y;
     float error = destination - cur_y;
     float derivative;
     if(abs(error) > 0.01) {
@@ -814,8 +810,8 @@ float AIObject::pitchAngleController(int destination)
         if( integral > 100) {
             integral = 100;
         }
-        if( integral < 0 ) {
-            integral = 0;
+        if( integral < -100 ) {
+            integral = -100;
         }
     }
     derivative = (error - prevError) / da;
@@ -824,19 +820,20 @@ float AIObject::pitchAngleController(int destination)
     if( angle > 30 ) {
         angle = 30;
     }
-    if( angle < 0 ) {
-        angle = 0.001;
+
+    if( angle < -30 ) {
+        angle = -30;
     }
 
     prevError = error;
+    qDebug() << "At y: " << cur_y << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
+    qDebug() << "Pitch set" << angle;
 
     return angle;
 }
 
 float AIObject::rollAngleController(int destination)
 {
-
-    //qDebug() << "Error: " << destination;
     float error = destination - cur_x;
     float derivative;
     if(abs(error) > 0.01) {
@@ -844,8 +841,8 @@ float AIObject::rollAngleController(int destination)
         if( integral2 > 100) {
             integral2 = 100;
         }
-        if( integral2 < 0 ) {
-            integral2 = 0;
+        if( integral2 < -100 ) {
+            integral2 = -100;
         }
     }
     derivative = (error - prevError2) / da;
@@ -854,10 +851,13 @@ float AIObject::rollAngleController(int destination)
     if( angle2 > 30 ) {
         angle2 = 30;
     }
-    if( angle2 < 0 ) {
-        angle2 = 0.001;
+
+    if( angle2 < -30 ) {
+        angle2 = -30;
     }
 
+    qDebug() << "At y: " << cur_x << "p:" << error*kp << "i: "<< integral2*ki << "d: " << derivative*kd;
+    qDebug() << "Roll set" << angle;
     prevError2 = error;
 
     return angle2;

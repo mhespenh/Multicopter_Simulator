@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QDBusArgument>
 
-#define DEBUG
+//#define DEBUG
 
 double deg2rad(double deg) {
     return deg*(PI/180);
@@ -50,8 +50,8 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         //connect exiting slot at some point
     }
 
-    targetPitch = 20;     //in degrees
-    targetRoll  = 20;     //in degrees
+    targetPitch = 0;     //in degrees
+    targetRoll  = 0;     //in degrees
     targetAltitude = 10; //in meters
     curPitch = 0;
     curRoll = 0;
@@ -82,13 +82,13 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
         }
      }
 
-//    theAI.setArmLength(armLength);
-//    qDebug() << theAI.setDestination(target_x, target_y);
-/*
+    theAI.setArmLength(armLength);
+    qDebug() << theAI.setDestination(target_x, target_y);
+
     QTimer *aiTimer = new QTimer(this);
     connect(aiTimer, SIGNAL(timeout()), this, SLOT(getAngles()));
     aiTimer->start(100); //100ms timer
-*/
+
     //timer to trigger physics refresh
     QTimer *physicsTimer = new QTimer(this);
     connect(physicsTimer, SIGNAL(timeout()), this, SLOT(updatePhysics()));
@@ -98,6 +98,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     QTimer *sharedMemTimer = new QTimer(this);
     connect(sharedMemTimer, SIGNAL(timeout()), this, SLOT(writeSharedMem()));
     sharedMemTimer->start(100); //100ms timer
+
 }
 
 
@@ -110,7 +111,7 @@ MulticopterSimulator::~MulticopterSimulator() {
 }
 
 void MulticopterSimulator::getAngles() {
-    //theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
+    theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
 }
 
 void MulticopterSimulator::setGravity(float grav) {

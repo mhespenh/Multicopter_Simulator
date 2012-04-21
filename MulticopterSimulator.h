@@ -62,5 +62,5 @@ private:
     QProcess* procs;
     QDBusConnection bus;
     QSharedMemory sharedMem;
-//    AIObject theAI;
+    AIObject theAI;
 };
