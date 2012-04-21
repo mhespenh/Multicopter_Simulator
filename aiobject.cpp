@@ -2,12 +2,12 @@
 
 AIObject::AIObject()
 {
-    dest_x = 200;
-    dest_y = 200;
-    kp = .01;     //proportional gain
-    ki = 0;   //integral gain
-    kd = 0.001;  //derivative gain
-    da = .1;     //simulation angle
+    dest_x = 0;
+    dest_y = 0;
+    kp = 0.00003;//.00001;     //proportional gain
+    ki = 0;//-.0000013;   //integral gain
+    kd = .0083;  //derivative gain
+    da = .01;     //simulation angle
     angle = 0.0;
     angle2 = 0.0;
     integral = 0.0;
@@ -15,6 +15,8 @@ AIObject::AIObject()
     prevError = 0.0;
     prevError2 = 0.0;
     arm_len = 1.8;
+    this->cur_x = 0;
+    this->cur_y = 0;
     pop_environment(); // Initial environment is a single pole with coordinates (100,100), (110,100), (110,110), (100,110);
 
 }
@@ -633,6 +635,14 @@ bool AIObject::setDestination(int x, int y)
     else return false;
 }
 
+void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y) {
+    this->cur_x = x;
+    this->cur_y = y;
+    pitch = pitchAngleController(this->dest_y);
+    roll = rollAngleController(this->dest_y);
+}
+
+/*
 void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
 {
     //qDebug() << "recvd - " << pitch << "," << roll;
@@ -641,8 +651,8 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
     cur_x = x;
     cur_y = y;
 
-    //qDebug() << "Current x,y: " << cur_x << "," << cur_y;
-    //qDebug() << "Destination: " << dest_x << "," << dest_y;
+    qDebug() << "Current x,y: " << cur_x << "," << cur_y;
+    qDebug() << "Destination: " << dest_x << "," << dest_y;
 
     //Figure direction
     if(cur_x > dest_x) x_dir = "West";
@@ -653,7 +663,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
     else if(cur_y < dest_y) y_dir = "North";
     else y_dir = "Set";
 
-    //qDebug() << "Direction: " << y_dir << x_dir;
+    qDebug() << "Direction: " << y_dir << x_dir;
 
     QList<int> N, E, S, W;
     N = scan(cur_x, cur_y, "N"); //distance, displacement
@@ -796,7 +806,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
     //qDebug() << "Pitch: " << pitch;
     //qDebug() << "Roll: " << roll;
 }
-
+*/
 void AIObject::setArmLength(double armLength) {
     this->arm_len = armLength;
 }
@@ -826,7 +836,8 @@ float AIObject::pitchAngleController(int destination)
     }
 
     prevError = error;
- //   qDebug() << "At y: " << cur_y << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
+    qDebug() << "At y: " << cur_y << "target: " << destination << "p:" << error*kp << "i: "<< integral*ki << "d: " << derivative*kd;
+    qDebug() << "Error: " << error;
  //   qDebug() << "Pitch set" << angle;
 
     return angle;

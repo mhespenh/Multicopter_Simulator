@@ -58,6 +58,7 @@ private:
     double* throttles; //pointer to throttle values
     float mass, gravity, armLength; //things
     int procCount;
+    int tx, ty;
     QProcess* proc;
     QProcess* procs;
     QDBusConnection bus;

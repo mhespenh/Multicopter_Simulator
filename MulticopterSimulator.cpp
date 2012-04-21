@@ -14,7 +14,7 @@
 #include <QDebug>
 #include <QDBusArgument>
 
-#define DEBUG
+//#define DEBUG
 
 double deg2rad(double deg) {
     return deg*(PI/180);
@@ -56,8 +56,8 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     curPitch = 0;
     curRoll = 0;
     curAltitude = 0;
-    target_x = 200;
-    target_y = 200;
+    target_x = 0;
+    target_y = 0;
     cur_x = 0;
     cur_y = 0;
     prev_x = 0;
@@ -66,6 +66,9 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     v_x = 0;
     v_y = 0;
     v_z = 0;
+
+    tx = 0;
+    ty = 0;
 
     mass = 1;       //in kg
     gravity = 9.8;  //in m/s^2
@@ -87,7 +90,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
 
     QTimer *aiTimer = new QTimer(this);
     connect(aiTimer, SIGNAL(timeout()), this, SLOT(getAngles()));
-    aiTimer->start(100); //100ms timer
+    aiTimer->start(dt*1000); //100ms timer
 
     //timer to trigger physics refresh
     QTimer *physicsTimer = new QTimer(this);
@@ -111,7 +114,18 @@ MulticopterSimulator::~MulticopterSimulator() {
 }
 
 void MulticopterSimulator::getAngles() {
+    int sx = 20;
+    int sy = 20;
+    if( (target_y-cur_y) < 0 ) {
+        sy *= -1;
+    }
+    if( (target_x-cur_x) < 0 ) {
+        sy *= -1;
+    }
     theAI.getTargetAngles(targetPitch, targetRoll, cur_x, cur_y);
+    tx = abs(target_x-cur_x) > 20 ? cur_x+sx : target_x;
+    ty = abs(target_y-cur_y) > 20 ? cur_y+sy : target_y;
+    theAI.setDestination(tx, ty);
 }
 
 void MulticopterSimulator::setGravity(float grav) {
@@ -186,7 +200,7 @@ void MulticopterSimulator::updatePhysics() {
     qDebug() << "Current throttles: " << throttles[0] << throttles[1] << throttles[2] << throttles[3];
     qDebug() << "\tTargets (" << targetPitch << "," << targetRoll << ") Current (" << curPitch << "," << curRoll << ")"
             << "Alt (" << targetAltitude << "," << curAltitude << ")"
-            << "x,y" << target_x << "," << target_y;
+            << "x,y" << target_x << "," << target_y << " tx,ty " << tx << "," << ty;
 #endif
     updatePosition();
     sendAngleUpdate(targetPitch, targetRoll, targetAltitude);
@@ -245,8 +259,8 @@ void MulticopterSimulator::writeSharedMem() {
     theData->altitude = this->curAltitude;
     theData->cur_x = (int)this->cur_x;
     theData->cur_y = (int)this->cur_y;
-    theData->target_x = (int)this->target_x;
-    theData->target_y = (int)this->target_y;
+    this->target_x = theData->target_x;
+    this->target_y = theData->target_y;
     theData->v_x = this->v_x;
     theData->v_y = this->v_y;
     theData->v_z = this->v_z;
