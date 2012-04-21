@@ -20,13 +20,14 @@ public:
 
 
 private:
-    float angleController(int);
+    float pitchAngleController(int);
+    float rollAngleController(int);
     void pop_environment();
     QList<int> scan(int, int, QString);
 
     float error;
     int scan_N;
-    int environment[600][600], cur_x, cur_y, prev_x, prev_y, arm_len, dest_x, dest_y;
+    int environment[ENVSIZE][ENVSIZE], cur_x, cur_y, prev_x, prev_y, dest_x, dest_y, arm_len;
     float kp, ki, kd, da;
     double angle;
     float prevError, integral;
