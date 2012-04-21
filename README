@@ -3,7 +3,8 @@ Usage:
         Make sure you change the PATH to the SimMotor binary in the constructor
             in MulticopterSimulator.cpp to match your directory structure 
 	(line 45 MulticopterSimulator.cpp)!
-        Run Multicopter_Simulator from the command line
+        Run Multicopter_Simulator from the command line (it will start 
+	instances of SimMotors as needed automagically)
 
 	Compile and run MulticopterGUI
 		See README in that repo for more details about the GUI
