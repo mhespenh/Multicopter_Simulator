@@ -1,8 +1,13 @@
 Usage:
         Compile both SimMotor and Multicopter_Simulator
         Make sure you change the PATH to the SimMotor binary in the constructor
-            in MulticopterSimulator.cpp to match your directory structure!
-        Run Multicopter_Simulator from the command line and enjoy
+            in MulticopterSimulator.cpp to match your directory structure 
+	(line 45 MulticopterSimulator.cpp)!
+        Run Multicopter_Simulator from the command line (it will start 
+	instances of SimMotors as needed automagically)
+
+	Compile and run MulticopterGUI
+		See README in that repo for more details about the GUI
 
 Changelog:
 	03/21/2012 - Initial Version -MAH
@@ -10,9 +15,18 @@ Changelog:
 	03/23/2012 - Successfully implemented DBus message passing -MAH
         03/25/2012 - Implemented a rough example of QSharedMemory -MAH
         03/26/2012 - Successfully implemented qProcesses! -MAH
+	04/03/2012 - Got most of physics working
+	04/16/2012 - Merged in AI
+	04/20/2012 - Working
 
 Notes:
-	Apparently there is non-trivial delay when connecting to the dbus, that is
-	why I have the motor process emiting a "started" signal over the dbus, 
-	otherwise we have no idea if/when the process has successfully connected to 
-	the bus.  That was fun to figure out...
+	You can vary the number of motors by changing the value passed in the
+	main file of MulticopterSimulator (default is 4).  Note that changing
+	this value may make the craft unstable/unflyable
+
+	You can also change the armLength (changes stability), mass, and gravity
+	using setArmLength(float), setMass(float), setGravity(float) in main.
+	Also acceleration (setAccceleration(float))
+	
+	Some tuning is still needed with the altitude PID algorithm, its a tiny
+	bit unstable.  I'll work on it, you might notice some minor changes. -MAH
