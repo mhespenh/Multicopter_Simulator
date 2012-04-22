@@ -26,7 +26,7 @@ Notes:
 
 	You can also change the armLength (changes stability), mass, and gravity
 	using setArmLength(float), setMass(float), setGravity(float) in main.
-	Also acceleration (setAccceleration(float))
+	Also altitude (setAltitude(float))
 	
 	Some tuning is still needed with the altitude PID algorithm, its a tiny
 	bit unstable.  I'll work on it, you might notice some minor changes. -MAH
