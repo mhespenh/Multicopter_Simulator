@@ -1,0 +1,13 @@
+Goals for v2:
+
+GUI:
+[ ] Consolodate all widgets into single window
+[ ] Correctly reflect number of engines 
+[ ] Correctly reflect arm length
+[ ] Implement display of obstacles from array
+[ ] Altitude controls
+
+Sim:
+[ ] Allow realtime tweaking of PID variables in user-code
+[ ] Functional AI/obstacle avoidance
+
