@@ -2,8 +2,8 @@
 #define AIOBJECT_H
 
 #define ENVSIZE 600
-#define DEFAULT_PITCH 10.0
-#define DEFAULT_ROLL 10.0
+#define DEFAULT_PITCH 0.0
+#define DEFAULT_ROLL 0.0
 
 #include<QDebug>
 #include<QList>
@@ -13,16 +13,23 @@
 class AIObject
 {
 public:
-    AIObject(int, int, int);
+    AIObject();
     bool setDestination(int, int);
-    void getTargetAngles(float&, float&);
+    void getTargetAngles(double&, double&, int, int);
+    void setArmLength(double);
+
+
 private:
+    float angleController(int);
     void pop_environment();
     QList<int> scan(int, int, QString);
 
+    float error;
     int scan_N;
     int environment[600][600], cur_x, cur_y, prev_x, prev_y, arm_len, dest_x, dest_y;
-    int stop;
+    float kp, ki, kd, da;
+    double angle;
+    float prevError, integral;
 };
 
 #endif // AIOBJECT_H

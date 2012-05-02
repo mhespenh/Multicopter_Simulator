@@ -12,9 +12,14 @@
 #include <QProcess>
 #include <QtDBus/QtDBus>
 #include <QSharedMemory>
+#include "aiobject.h"
+
+#define PI 3.1415926535897932384626433832795028841971693993751058209
 
 struct data {
     int t0, t1, t2, t3;
+    int cur_x, cur_y, target_x, target_y;
+    double pitch, roll, altitude, v_x, v_y;
 };
 
 class MulticopterSimulator : public QObject
@@ -23,21 +28,39 @@ class MulticopterSimulator : public QObject
 public:
     explicit MulticopterSimulator(int numProcs, QObject *parent = 0);
     ~MulticopterSimulator();
+    void setMass(float);
+    void setGravity(float);
+    void setArmLength(float);
 
 signals:
 
-public slots:
-    void processError(void);
-    void processSTDOUT(void);
+public slots: //these must be public to the dbus can hit them
     void processExit(int,QProcess::ExitStatus);
     void recvMessage(QString);
+    void recvUpdate(int, double);
     void processStarted(QString);
+    void setTargetPosition(int, int);
+    void getAngles(void);
+
+private slots:
+    void updatePhysics(void);
+    void writeSharedMem(void);
 
 private:
+    void updatePosition(void);
     void sendDbusMessage(QString, int);
-    bool writeSharedMem();
+    void sendAngleUpdate(double , double , double);
+    double curPitch, curRoll, curAltitude, dt;
+    double targetPitch, targetRoll, targetAltitude;
+    double v_x, v_y; //velocity in the x and y plane
+    double cur_x, cur_y, prev_x, prev_y; //positions
+    int target_x, target_y, numMotors; //number of motors
+    double* throttles; //pointer to throttle values
+    float mass, gravity, armLength; //things
+    int procCount;
     QProcess* proc;
     QProcess* procs;
     QDBusConnection bus;
     QSharedMemory sharedMem;
+    AIObject theAI;
 };
