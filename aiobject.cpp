@@ -686,15 +686,15 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else if(distances.at(0) < 0 && distances.at(1) >= 0) { // North is free but East has obstacles
                 pitch = pitchAngleController(dest_y);
-                roll = rollAngleController(displacements.at(1));
+                roll = rollAngleController(displacements.at(1) + cur_x);
             }
             else if(distances.at(0) >= 0 && distances.at(1) < 0) { //North is blocked but East is free
-                pitch = pitchAngleController(displacements.at(0));
+                pitch = pitchAngleController(displacements.at(0) + cur_y);
                 roll = rollAngleController(dest_x);
             }
             else { // NorthEast is blocked
-                pitch = pitchAngleController(displacements.at(0));
-                roll = rollAngleController(displacements.at(1));
+                pitch = pitchAngleController(displacements.at(0) + cur_y);
+                roll = rollAngleController(displacements.at(1) + cur_x);
             }
         }
         else if(x_dir == "West"){ //Need to head West!
@@ -704,15 +704,15 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else if(distances.at(0) < 0 && distances.at(3) >= 0) { // North is free but West has obstacles
                 pitch = pitchAngleController(dest_y);
-                roll = rollAngleController(displacements.at(3));
+                roll = rollAngleController(displacements.at(3) + cur_x);
             }
             else if(distances.at(0) >= 0 && distances.at(3) < 0) { //North is blocked but East is free
-                pitch = pitchAngleController(displacements.at(0));
+                pitch = pitchAngleController(displacements.at(0) + cur_y);
                 roll = rollAngleController(dest_x);
             }
             else { // NorthEast is blocked
-                pitch = pitchAngleController(displacements.at(0));
-                roll = rollAngleController(displacements.at(3));
+                pitch = pitchAngleController(displacements.at(0) + cur_y);
+                roll = rollAngleController(displacements.at(3) + cur_x);
             }
         }
         else{
@@ -734,15 +734,15 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else if(distances.at(2) < 0 && distances.at(1) >= 0) { // South is free but East has obstacles
                 pitch = pitchAngleController(dest_y);
-                roll = rollAngleController(displacements.at(1));
+                roll = rollAngleController(displacements.at(1) + cur_x);
             }
             else if(distances.at(2) >= 0 && distances.at(1) < 0) { //South is blocked but East is free
-                pitch = pitchAngleController(displacements.at(2));
+                pitch = pitchAngleController(displacements.at(2) + cur_y);
                 roll = rollAngleController(dest_x);
             }
             else { // SouthEast is blocked
-                pitch = pitchAngleController(displacements.at(2));
-                roll = rollAngleController(displacements.at(1));
+                pitch = pitchAngleController(displacements.at(2) + cur_y);
+                roll = rollAngleController(displacements.at(1) + cur_x);
             }
         }
         else if(x_dir == "West"){ //Need to head West!
@@ -752,15 +752,15 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else if(distances.at(2) < 0 && distances.at(3) >= 0) { // South is free but West has obstacles
                 pitch = pitchAngleController(dest_y);
-                roll = rollAngleController(displacements.at(3));
+                roll = rollAngleController(displacements.at(3) + cur_x);
             }
             else if(distances.at(2) >= 0 && distances.at(3) < 0) { //South is blocked but East is free
-                pitch = pitchAngleController(displacements.at(2));
+                pitch = pitchAngleController(displacements.at(2) + cur_y);
                 roll = rollAngleController(dest_x);
             }
             else { // SouthEast is blocked
-                pitch = pitchAngleController(displacements.at(2));
-                roll = rollAngleController(displacements.at(3));
+                pitch = pitchAngleController(displacements.at(2) + cur_y);
+                roll = rollAngleController(displacements.at(3) + cur_x);
             }
         }
         else{
@@ -769,7 +769,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
                 roll = DEFAULT_ROLL;
             }
             else {
-                pitch = pitchAngleController(displacements.at(2));
+                pitch = pitchAngleController(displacements.at(2) + cur_y);
                 roll = DEFAULT_ROLL;
             }
         }
@@ -782,7 +782,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else {
                 pitch = DEFAULT_PITCH;
-                roll = rollAngleController(displacements.at(1));
+                roll = rollAngleController(displacements.at(1) + cur_x);
             }
         }
         else if(x_dir == "West"){
@@ -792,7 +792,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
             }
             else {
                 pitch = DEFAULT_PITCH;
-                roll = rollAngleController(displacements.at(3));
+                roll = rollAngleController(displacements.at(3) + cur_x);
             }
         }
         else { //Destination reached!
