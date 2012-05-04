@@ -24,7 +24,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     QObject(parent), bus(QDBusConnection::sessionBus()), sharedMem("PUBLIC_SHARED_MEM")
 {
     procs = new QProcess[numProcs];
-    throttles = new double[numProcs];
+    throttles = new double[8];
 
     //Signal: procStart- Motor process will emit this signal over the dbus when is starts and connects
     bus.connect("", "/", "edu.vt.ece.procStart", "procStart", this, SLOT(processStarted(QString)));
@@ -56,7 +56,7 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     //init a bunch of stuff
     targetPitch = 0;     //in degrees
     targetRoll  = 0;     //in degrees
-    targetAltitude = 10; //in meters
+    targetAltitude = 0; //in meters
     curPitch = 0;
     curRoll = 0;
     curAltitude = 0;
@@ -236,6 +236,22 @@ void MulticopterSimulator::updatePosition() {
     prev_x = cur_x;
     prev_y = cur_y;
     prev_alt = curAltitude;
+    heading = atan(v_y/v_x)*(180/PI);
+    //do some magic to make arctan work in all quadrants
+    if( v_y < 0) {
+        if(v_x < 0) {
+            heading += 180;
+        }
+        else {
+            heading = 360-heading;
+        }
+    }
+    else {
+        if(v_x < 0) {
+            heading = 360-heading;
+        }
+    }
+
 #ifdef DEBUG
     qDebug() << "x,y " << cur_x << "," << cur_y;// << " vx,vy,vz" << v_x << "," << v_y << "," << v_z;
 #endif
@@ -273,20 +289,28 @@ void MulticopterSimulator::writeSharedMem() {
     sharedMem.lock(); //lock the shared memory mutex
     theData = (data*)sharedMem.data(); //ptr to the shared memory data
     //write it all out
-    theData->t0 = (int)throttles[0];
-    theData->t1 = (int)throttles[1];
-    theData->t2 = (int)throttles[2];
-    theData->t3 = (int)throttles[3];
+    theData->throttles[0] = (int)throttles[0];
+    theData->throttles[1] = (int)throttles[1];
+    theData->throttles[2] = (int)throttles[2];
+    theData->throttles[3] = (int)throttles[3];
+    theData->throttles[4] = (int)throttles[4];
+    theData->throttles[5] = (int)throttles[5];
+    theData->throttles[6] = (int)throttles[6];
+    theData->throttles[7] = (int)throttles[7];
+    theData->numMotors = this->numMotors;
+    theData->heading = this->heading;
     theData->pitch = this->curPitch;
     theData->roll = this->curRoll;
-    theData->altitude = this->curAltitude;
+    theData->cur_alt = this->curAltitude;
     theData->cur_x = (int)this->cur_x;
     theData->cur_y = (int)this->cur_y;
-    this->target_x = theData->target_x;
-    this->target_y = theData->target_y;
     theData->v_x = this->v_x;
     theData->v_y = this->v_y;
     theData->v_z = this->v_z;
+    //get data from memory
+    this->target_x = theData->target_x;
+    this->target_y = theData->target_y;
+    this->targetAltitude = theData->target_alt;
     sharedMem.unlock(); //release mutex lock
 #ifdef DEBUG
     qDebug() << "Wrote to Shared Memory: " << theData->t0 << theData->t1 << theData->t2 << theData->t3;

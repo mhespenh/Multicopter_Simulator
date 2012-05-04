@@ -17,9 +17,10 @@
 #define PI 3.1415926535897932384626433832795028841971693993751058209
 
 struct data {
-    int t0, t1, t2, t3;
+    double throttles[8];
+    int numMotors;
     int cur_x, cur_y, target_x, target_y;
-    double pitch, roll, altitude, v_x, v_y, v_z;
+    double pitch, roll, cur_alt, target_alt, v_x, v_y, v_z, heading;
 };
 
 class MulticopterSimulator : public QObject
@@ -52,7 +53,7 @@ private:
     void sendDbusMessage(QString, int);
     void sendAngleUpdate(double , double , double);
 
-    double curPitch, curRoll, curAltitude, dt;
+    double curPitch, curRoll, curAltitude, dt, heading;
     double targetPitch, targetRoll, targetAltitude;
     double v_x, v_y, v_z; //velocity in the x and y plane
     double cur_x, cur_y, prev_x, prev_y, prev_alt; //positions
