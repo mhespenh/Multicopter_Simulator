@@ -60,10 +60,10 @@ MulticopterSimulator::MulticopterSimulator(int numProcs, QObject *parent) :
     curPitch = 0;
     curRoll = 0;
     curAltitude = 0;
-    target_x = 0;
-    target_y = 0;
-    cur_x = 0;
-    cur_y = 0;
+    target_x = 100;
+    target_y = 100;
+    cur_x = 100;
+    cur_y = 100;
     prev_x = 0;
     prev_y = 0;
     prev_alt = 0;
@@ -122,6 +122,8 @@ MulticopterSimulator::~MulticopterSimulator() {
 // otherwise the PID controller goes all wonky.  So if the
 // target is more than 20, just go 20 at a time till we get there
 void MulticopterSimulator::getAngles() {
+
+//    theAI.setDestination(target_x, target_y); //send the update
     int sx = 20;
     int sy = 20;
     if( (target_y-cur_y) < 0 ) {
@@ -134,6 +136,7 @@ void MulticopterSimulator::getAngles() {
     tx = abs(target_x-cur_x) > 20 ? cur_x+sx : target_x; //20 at a time
     ty = abs(target_y-cur_y) > 20 ? cur_y+sy : target_y; //til we get there
     theAI.setDestination(tx, ty); //send the update
+
 }
 
 void MulticopterSimulator::setGravity(float grav) {

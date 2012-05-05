@@ -2,8 +2,8 @@
 
 AIObject::AIObject()
 {
-    dest_x = 0;
-    dest_y = 0;
+    dest_x = 100;
+    dest_y = 100;
     kp = 0.00003;//.00001;     //proportional gain
     ki = 0;//-.0000013;   //integral gain
     kd = .0093;  //derivative gain
@@ -30,6 +30,11 @@ void AIObject::pop_environment()
               //  environment[i][y] = 1;
             //}
              environment[i][y] = 0;
+        }
+    }
+    for(int i=400; i<500; i++) {
+        for(int j=100; j<500; j++) {
+            environment[i][j] = 1;
         }
     }
 }
@@ -634,7 +639,7 @@ bool AIObject::setDestination(int x, int y)
     }
     else return false;
 }
-
+/*
 void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y) {
     this->cur_x = x;
     this->cur_y = y;
@@ -642,7 +647,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y) {
     roll = rollAngleController(this->dest_x);
 }
 
-/*
+*/
 void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
 {
     //qDebug() << "recvd - " << pitch << "," << roll;
@@ -806,7 +811,7 @@ void AIObject::getTargetAngles(double& pitch, double& roll, int x, int y)
     //qDebug() << "Pitch: " << pitch;
     //qDebug() << "Roll: " << roll;
 }
-*/
+
 void AIObject::setArmLength(double armLength) {
     this->arm_len = armLength;
 }
